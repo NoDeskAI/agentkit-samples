@@ -46,12 +46,14 @@ veadk web
 
 ```bash
 cd hello_world
+# 这一步直接运行即可
+export VEFAAS_ENABLE_KEY_AUTH=false
 # 这一步需要把YOUR_AK换成自己的ak
 export VOLCENGINE_ACCESS_KEY=YOUR_AK
 # 这一步需要把YOUR_AK换成自己的sk
 export VOLCENGINE_SECRET_KEY=YOUR_SK
 # 这一步部署应用到云上
-veadk deploy --vefaas-app-name=hello-world --use-adk-web --veapig-instance-name=dong-mcp-agent2 --iam-role "trn:iam::<your account id>:role/<your iam role name>"
+veadk deploy --vefaas-app-name=hello-world --use-adk-web --veapig-instance-name=<your veapig instance name> --iam-role "trn:iam::<your account id>:role/<your iam role name>"
 
 ```
 
@@ -61,7 +63,6 @@ veadk deploy --vefaas-app-name=hello-world --use-adk-web --veapig-instance-name=
 cd hello_world
 # Uncomment the following line in agent.py to run the agentkit app server
 # agent_server_app.run(host="0.0.0.0", port=8000)
-
 agentkit config
 agentkit launch
 ```
