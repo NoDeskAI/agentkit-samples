@@ -2,7 +2,7 @@
 
 ## 项目概述
 
-这是一个基于火山引擎AgentKit构建的智能编程助手系统，专门用于帮助用户解决各类编程问题。系统集成了代码执行沙箱、TOS对象存储服务和长期记忆功能，能够提供专业、高效的编程辅助体验。
+这是一个基于火山引擎AgentKit构建的智能编程助手系统，专门用于帮助用户解决各类编程问题。系统集成了代码执行沙箱、TOS对象存储服务功能，能够提供专业、高效的编程辅助体验。
 
 ## 功能特性
 
@@ -21,7 +21,6 @@
 ai-coding/
 ├── agent.py    # 主智能体应用，包含智能体配置和运行逻辑
 ├── tools.py              # 工具函数模块，包含TOS上传、URL生成等功能
-├── example-agentkit.yaml # AgentKit配置文件，定义部署参数和环境变量
 ├── requirements.txt      # Python依赖包列表
 └── README.md            # 项目说明文档
 ```
@@ -39,8 +38,6 @@ AI Coding Agent (主智能体)
     ├── 代码执行工具 (run_code)
     ├── TOS上传工具 (upload_frontend_code_to_tos)
     ├── URL生成工具 (get_url_of_frontend_code_in_tos)
-    └── 代码智能体 (子智能体)
-        └── 代码生成引擎
 ```
 
 ### 工具集成
@@ -50,7 +47,7 @@ AI Coding Agent (主智能体)
 - **代码执行工具**：基于沙箱环境的安全代码执行
 - **TOS上传与下载工具**：自动化前端代码托管
 
-## 详细配置指南
+## 快速开始
 
 ### 1. 前置准备
 
@@ -73,118 +70,83 @@ AI Coding Agent (主智能体)
    - 描述：AI编程助手工具
 4. 复制显示的工具ID，用于后续配置
 
-### 2. 部署到云上（从本地部署到AgentKit）
-
-#### 配置agentkit.yaml
-
-1. 重命名 `example-agentkit.yaml` 为 `agentkit.yaml`
-2. 编辑 `agentkit.yaml`，完善 runtime_envs 配置：
-
-```
-    runtime_envs:
-      # 系统环境变量
-      # 模型名称
-      MODEL_AGENT_NAME: deepseek-v3-1-terminus
-      # 火山引擎访问密钥
-      VOLCENGINE_ACCESS_KEY: 
-      VOLCENGINE_SECRET_KEY: 
-      # 工具ID
-      AGENTKIT_TOOL_ID: 
-      # TOS 存储桶名称
-      TOS_BUCKET_NAME: ai-coding-agentkit-{{account_id}}
-```
-
-#### 安装agentkit cli
-
-1. 确保已安装 Python 3.12 或以上版本
-2. 安装 agentkit cli：
+### 2. 安装依赖
 
 ```bash
-pip3 install -U agentkit-sdk-python  --index-url https://artifacts-cn-beijing.volces.com/repository/agentkit/simple/ --extra-index-url https://mirrors.volces.com/pypi/simple/
+cd 02-use-cases/ai_coding
+uv pip install -r requirements.txt
+# 或
+pip3 install -r requirements.txt
 ```
 
-#### 部署到AgentKit & 验证
+### 3. 配置环境变量
 
-1. 配置环境变量
-
-```
-export VOLCENGINE_ACCESS_KEY=your_actual_access_key
-export VOLCENGINE_SECRET_KEY=your_actual_secret_key
-```
-
-2. 在项目根目录执行部署命令：
+本地必需：
 
 ```bash
+export VOLCENGINE_ACCESS_KEY=AK
+export VOLCENGINE_SECRET_KEY=SK
+export DATABASE_TOS_BUCKET=agentkit-platform-{{your account_id}}
+export AGENTKIT_TOOL_ID={{your tool_id}}
+```
+
+说明：
+
+- `DATABASE_TOS_BUCKET`用来存储前端代码
+
+### 4. 启动与部署
+
+#### 本地调试
+
+本地可以使用 veadk web 进行调试
+
+```bash
+# 1. 进入 ai_coding 的上级目录
+cd 02-use-cases
+
+# 2. [可选] 创建配置配置 .env 文件，如果 步骤2 已经配置了环境变量，这里可以跳过
+touch .env
+# 配置 .env 文件, 
+echo "VOLCENGINE_ACCESS_KEY=AK" >> .env
+echo "VOLCENGINE_SECRET_KEY=SK" >> .env
+# 可选：如果未设置已有知识库，agent会自动创建知识库并做初始化导入， 这一步需要设置 DATABASE_TOS_BUCKET， 主要上传知识库内容并导入
+echo "DATABASE_TOS_BUCKET=agentkit-platform-{{your account_id}}" >> .env
+echo "AGENTKIT_TOOL_ID={{your tool_id}}" >> .env
+# 3.启动 veadk web 调试
+veadk web 
+```
+
+veadk web 默认会监听 8000 端口， 服务启动后，你可以在浏览器中访问 `http://127.0.0.1:8000`， agent 选择 `ai_coding`， 即可在 web 右侧的输入框中输入问题， 并查看智能体的回复。
+
+#### 部署到火山引擎 AgentKit（runtime）：
+
+使用 agentkit 部署到火山引擎。
+
+```bash
+# 1. 进入到 ai_coding 目录
+cd 02-use-cases/ai_coding
+
+# 2. 配置 agentkit
+agentkit config \
+--agent_name ai_coding \
+--entry_point 'agent.py' \
+--runtime_envs DATABASE_TOS_BUCKET=agentkit-platform-{{your account_id}} \
+--runtime_envs AGENTKIT_TOOL_ID={{your tool_id}} \
+--launch_type cloud
+
+# 3. 部署到 runtime 
 agentkit launch
 ```
 
-3. 部署完成后，执行验证
+发布成功后，可以登录火山引擎 AgentKit 控制台，点击 Runtime 查看部署的智能体。
 
-```bash
-agentkit invoke --payload '{"prompt": "帮我生成一个python3 的函数，计算两个数组之和"}' 
+## 使用与测试
 
-agentkit invoke --payload '{"prompt": "帮我生成一个 ERP系统的管理后台页面， 输出一个可以预览的demo首页页面"}' 
-```
+示例 Prompt：
 
-### 3. 部署到云上（直接从镜像部署，无需本地代码）
+- 前端代码生成：请帮我用JavaScript写一个防抖功能
+- python代码生成：请帮我写一个斐波那契数列生成函数
 
-#### 创建 Runtime
+## 常见问题
 
-1. 去火山引擎 AgentKit 控制台，新建 Runtime
-2. 填写 Runtime的基础信息： 名称、描述等
-3. 填写 Runtime的镜像地址， 可以使用以下镜像地址
-
-```
-agentkit-toolkit-cli-m0fi-cn-beijing.cr.volces.com/agentkit/ai_coding_agent:20251118103330
-```
-
-4. 填写 Runtime的环境变量， 参考 1. 前置准备 中的配置
-
-```
-# 模型名称
-MODEL_AGENT_NAME: deepseek-v3-1-terminus
-# 火山引擎访问密钥
-VOLCENGINE_ACCESS_KEY: 
-VOLCENGINE_SECRET_KEY: 
-# 工具ID
-AGENTKIT_TOOL_ID: 
-# TOS 存储桶名称
-TOS_BUCKET_NAME: 
-```
-
-5. 部署发布 Runtime
-
-#### 测试 Runtime
-
-1. 去火山引擎 AgentKit 控制台，查询 Runtime 列表， 找到刚创建的 Runtime
-2. 点击"调试"按钮，完善请求信息
-   - 填写header： user_id: user1, session_id: session1
-   - 填写测试 payload：
-
-   ```json
-   {
-       "prompt": "帮我生成一个python3 的函数，计算两个数组之和"
-   }
-   ```
-3. 点击"执行"，查看返回结果
-
-![alt text](img/image-2.png)
-
-## 实际效果
-
-1. 生成静态页面
-
-![alt text](img/image-1.png)
-
-2. 后端代码
-
-![alt text](img/image.png)
-
-## 观测
-
-1. 去火山引擎 AgentKit 控制台，查询 Runtime 列表， 找到刚创建的 Runtime， 进入到 Runtime 详情页
-2. 点击"观测"按钮， 可以查看 Runtime 的运行日志、指标、追踪信息等
-
-![alt text](img/image-3.png)
-
-![alt text](img/image-4.png)
+- 首次运行报错 `DATABASE_TOS_BUCKET not set`：需设置用于代码上传的 TOS Bucket 名称。
