@@ -71,7 +71,7 @@ def upload_file_to_tos(
         >>> print(url)
         https://bucket.tos-cn-beijing.volces.com/video.mp4?X-Tos-Signature=...
     """
-    bucket_name = os.getenv("DATABASE_TOS_BUCKET", "aaa-bbb-ccc-ddd")
+    bucket_name = os.getenv("DATABASE_TOS_BUCKET")
 
     # Check if file exists
     if not os.path.exists(file_path):
