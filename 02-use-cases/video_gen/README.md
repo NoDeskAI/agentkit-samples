@@ -59,6 +59,8 @@ AgentKit 运行时
 
 1. 登录 [火山引擎控制台](https://console.volcengine.com)
 2. 进入"访问控制" → "用户" -> 新建用户 或 搜索已有用户名 -> 点击用户名进入"用户详情" -> 进入"密钥" -> 新建密钥 或 复制已有的 AK/SK
+   - 如下图所示
+   ![Volcengine AK/SK Management](../img/volcengine_aksk.jpg)
 3. 为用户配置 AgentKit运行所依赖服务的访问权限:
    - 在"用户详情"页面 -> 进入"权限" -> 点击"添加权限"，将以下策略授权给用户
     - `AgentKitFullAccess`（AgentKit 全量权限）
@@ -66,6 +68,8 @@ AgentKit 运行时
 4. 为用户获取火山方舟模型 Agent API Key
    - 搜索"火山方舟"产品，点击进入控制台
    - 进入"API Key管理" -> 创建 或 复制已有的 API Key
+   - 如下图所示
+   ![Ark API Key Management](../img/ark_api_key_management.jpg)
 5. 开通模型预置推理接入点
    - 搜索"火山方舟"产品，点击进入控制台
    - 进入"开通管理" -> "语言模型" -> 找到相应模型 -> 点击"开通服务"
@@ -73,6 +77,8 @@ AgentKit 运行时
         - root_agent模型：`deepseek-v3-1-terminus`
         - 生图模型：`doubao-seedream-4-0-250828`
         - 生视频模型：`doubao-seedance-1-0-pro-250528`
+   - 如下图所示
+   ![Ark Model Service Management](../img/ark_model_service_management.jpg)
 
 ### 安装依赖
 
@@ -112,6 +118,8 @@ export DOWNLOAD_DIR=/tmp
 
 **TOS 存储桶配置:**
 - 默认存储桶: `agentkit-platform-{{your_account_id}}`
+    - 其中`{{your_account_id}}`需要替换为您的火山引擎账号 ID
+    - 示例: `DATABASE_TOS_BUCKET=agentkit-platform-12345678901234567890`
 - 若需自定义,可在 [`tool/tos_upload.py`](tool/tos_upload.py) 中修改 `bucket_name` 参数或在工具调用时传入
 
 ## 本地测试

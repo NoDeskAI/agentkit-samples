@@ -49,16 +49,31 @@ AgentKit 运行时
 **Python 版本**
 - 需要 Python 3.12 或更高版本
 
-**火山引擎服务**
-1. **访问凭证**: 登录 [火山引擎控制台](https://console.volcengine.com)
-   - 进入"访问控制" → "密钥管理"
-   - 点击"创建密钥"生成 Access Key 和 Secret Key
-   - 为凭证配置以下产品权限:
-     - AgentKit (智能体运行时和工具)
-     - TOS (知识库文件存储)
-     - Viking (知识和记忆的向量数据库)
+**1. 火山引擎访问凭证**
 
-2. **知识库** (首次运行自动配置):
+1. 登录 [火山引擎控制台](https://console.volcengine.com)
+2. 进入"访问控制" → "用户" -> 新建用户 或 搜索已有用户名 -> 点击用户名进入"用户详情" -> 进入"密钥" -> 新建密钥 或 复制已有的 AK/SK
+   - 如下图所示
+   ![Volcengine AK/SK Management](../img/volcengine_aksk.jpg)
+3. 为用户配置 AgentKit运行所依赖服务的访问权限:
+   - 在"用户详情"页面 -> 进入"权限" -> 点击"添加权限"，将以下策略授权给用户
+    - `AgentKitFullAccess`（AgentKit 全量权限）
+    - `APMPlusServerFullAccess`（APMPlus 全量权限）
+4. 为用户获取火山方舟模型 Agent API Key
+   - 登陆[火山方舟控制台](https://console.volcengine.com/ark/region:ark+cn-beijing/overview?briefPage=0&briefType=introduce&type=new)
+   - 进入"API Key管理" -> 创建 或 复制已有的 API Key，后续`MODEL_AGENT_API_KEY`环境变量需要配置为该值
+   - 如下图所示
+   ![Ark API Key Management](../img/ark_api_key_management.jpg)
+5. 开通模型预置推理接入点
+   - 登陆[火山方舟控制台](https://console.volcengine.com/ark/region:ark+cn-beijing/overview?briefPage=0&briefType=introduce&type=new)
+   - 进入"开通管理" -> "语言模型" -> 找到相应模型 -> 点击"开通服务"
+   - 确认开通，等待服务生效（通常1-2分钟）
+   - 开通本案例中使用到的以下模型（您也可以根据实际需求开通其他模型的预置推理接入点，并在`agent.py`代码中指定使用的模型）
+      - `deepseek-v3-1-terminus`
+   - 如下图所示
+   ![Ark Model Service Management](../img/ark_model_service_management.jpg)
+
+**2. 知识库(首次运行自动配置)**:
    - 如未设置 `DATABASE_VIKING_COLLECTION`,智能体将自动:
      - 上传 `pre_build/knowledge/` 中的文件到 TOS
      - 创建 Viking 集合
@@ -108,6 +123,9 @@ export DATABASE_MEM0_API_KEY=<mem0_api_key>
 
 **环境变量说明:**
 - `DATABASE_TOS_BUCKET`: 用于自动知识库初始化所需。若未设置 `DATABASE_VIKING_COLLECTION`，首次运行会将 `pre_build/knowledge` 自动上传至 TOS 并导入 Viking 向量库。
+    - 格式: `DATABASE_TOS_BUCKET=agentkit-platform-{{your_account_id}}`
+    - 示例: `DATABASE_TOS_BUCKET=agentkit-platform-12345678901234567890`
+    - 其中`{{your_account_id}}`需要替换为您的火山引擎账号 ID
 - `DATABASE_VIKING_COLLECTION`: 预创建的知识库集合名称 (生产环境推荐)
 - 模型默认为 `deepseek-v3-1-terminus` ，如需更改可在代码中调整。
 
