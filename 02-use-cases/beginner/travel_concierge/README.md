@@ -169,11 +169,11 @@ export VOLCENGINE_ACCESS_KEY=<Your Access Key>
 export VOLCENGINE_SECRET_KEY=<Your Secret Key>
 
 # 基础部署（快速开始）
-veadk deploy --vefaas-app-name=travel_example --use-adk-web
+veadk deploy --vefaas-app-name=travel-example --use-adk-web
 
 # 生产级部署（推荐）
 veadk deploy \
-  --vefaas-app-name=travel_example \
+  --vefaas-app-name=travel-example \
   --use-adk-web \
   --veapig-instance-name=<Your veaPIG Instance> \
   --iam-role "trn:iam::<Your Account ID>:role/<Your IAM Role>"
@@ -190,10 +190,9 @@ agentkit config
 # 启动云端服务
 agentkit launch
 
-# 测试部署的 Agent
-agentkit invoke '帮我制定一个杭州三日游'
+# 编辑client.py，将其中的第14行和第15行的base_url与api_key修改为agentkit.yaml中生成的runtime_endpoint与runtime_apikey字段
 
-# 或使用 client.py 连接云端服务
+# 使用 client.py 连接云端服务
 uv run client.py
 ```
 
