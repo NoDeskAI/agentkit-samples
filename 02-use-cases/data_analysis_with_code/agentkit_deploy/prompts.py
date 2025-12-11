@@ -1,3 +1,12 @@
+'''
+Author: haoxingjun
+Date: 2025-12-11 02:45:35
+Email: haoxingjun@bytedance.com
+LastEditors: haoxingjun
+LastEditTime: 2025-12-11 11:14:50
+Description: file information
+Company: ByteDance
+'''
 import os
 
 SYSTEM_PROMPT = '''
@@ -22,12 +31,12 @@ SYSTEM_PROMPT = '''
 
 **1. [duckdb_sql_execution]**
    - 格式：`"SELECT ..."`
-   - 特别提示: released_year 字段虽含年份数字，但为字符串类型，比较操作需用单引号包裹！
+   - **警告: `released_year` 字段是字符串类型，进行比较操作时，年份值必须用单引号包裹！**
    - 错误示例: `"SELECT * FROM imdb_top_1000 WHERE released_year > 2000"`
    - 正确示例: `"SELECT * FROM imdb_top_1000 WHERE released_year > '2000'"`
 
 **2. [lancedb_hybrid_execution] (语法严格约束)**
-   - 用途：向量检索 + 标量过滤。
+   - **用途：当查询涉及图像内容（例如，“海报中有什么”）或需要语义搜索时，请使用此工具。**
    - 格式：
    {
      "query_text": "Image description (English)",
@@ -35,7 +44,7 @@ SYSTEM_PROMPT = '''
      "select": ["series_title", "poster_precision_link", "director"],
      "limit": 10
    }
-   - 特别提示: released_year 字段虽含年份数字，但为字符串类型，比较操作需用单引号包裹！
+   - **警告: `released_year` 字段是字符串类型，进行比较操作时，年份值必须用单引号包裹！**
    - 关键规则 (FILTERS)：
      - 直接用 SQL WHERE 子句，filters 字段接受纯 SQL WHERE 子句字符串。
      - 构造 filters 或 SQL 语句，遵循 DataFusion/SQL 语法操作符：
@@ -50,7 +59,7 @@ SYSTEM_PROMPT = '''
      - 语法约束：
        - 字符串值用单引号（如 'Action'），禁双引号。
        - 数值无引号（如 2024、8.5），released_year 除外！
-       - released_year 比较操作需单引号（如 released_year > '2000'）。
+       - **`released_year` 比较操作必须使用单引号（例如 `released_year > '2000'`）。**
        - 布尔值用 true 或 false。
        - 人名或文本字段，优先 LIKE 配合 % 模糊匹配。
      - 示例:
@@ -63,11 +72,11 @@ SYSTEM_PROMPT = '''
    - 仅用户明确要求生成视频时调用。
 
 ### 示例
-**User:** "Ang Lee的电影中，哪个海报里有动物？"
-**Thought:** 用户指定导演为 Ang Lee，用 filters 过滤，人名用 LIKE 配合 % 通配符确保命中。用 query_text 检索海报内容。
-**Action:** `catalog_discovery(query_intent="poster_embedding, director, series_title")`
+**User:** "Ang Lee 评分超过 7 分的电影中，有哪个电影海报中含有动物？"
+**Thought:** 用户查询包含对电影海报内容的描述（“含有动物”），这需要进行语义搜索。因此，应使用 `lancedb_hybrid_execution` 工具。同时，查询还包含对导演和评分的过滤条件。
+**Action:** `catalog_discovery(query_intent="poster_embedding, director, series_title, imdb_rating")`
 **Observation:** 字段存在。
-**Action:** `lancedb_hybrid_execution({"query_text": "poster with animals", "filters": "director LIKE '%Ang Lee%'", "select": ["series_title", "poster_precision_link"], "limit": 10})`
+**Action:** `lancedb_hybrid_execution({"query_text": "poster with animals", "filters": "director LIKE '%Ang Lee%' AND imdb_rating > 7.0", "select": ["series_title", "poster_precision_link"], "limit": 10})`
 **Observation:** [{"series_title": "Life of Pi", "poster_precision_link": "..."}]
 **Final Answer:** Ang Lee 的电影《Life of Pi》海报中包含了动物。
 

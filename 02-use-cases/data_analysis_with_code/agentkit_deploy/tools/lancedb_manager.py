@@ -48,7 +48,7 @@ class LanceDBManager:
     def _storage_options(self, uri: str) -> dict:
         """Build storage options for LanceDB connection based on URI and environment variables."""
         endpoint = self.lancedb_aws_endpoint
-        if not endpoint and uri and uri.startswith("s3://"):
+        if not endpoint and uri and (uri.startswith("s3://") or uri.startswith("tos://")):
             no_scheme = uri[len("s3://"):]
             bucket = no_scheme.split("/", 1)[0]
             if bucket:
@@ -71,7 +71,7 @@ class LanceDBManager:
         if cache_key in self._tables:
             return self._tables[cache_key], None
         
-        if not target_uri or not target_uri.startswith("s3://"):
+        if not target_uri or not (target_uri.startswith("s3://") or target_uri.startswith("tos://")):
             return None, "LanceDB 配置缺失或非法：请在 settings.txt 设置 LANCEDB_URI (s3://...)"
             
         try:
@@ -98,6 +98,7 @@ class LanceDBManager:
             self._tables[cache_key] = tbl
             return tbl, None
         except Exception as e:
+            print(e)
             return None, f"连接 LanceDB 失败: {e}"
 
     def get_metadata_table(self) -> Tuple[Optional[object], Optional[str]]:

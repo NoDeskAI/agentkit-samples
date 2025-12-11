@@ -67,8 +67,8 @@
 编辑 `data_analysis_with_code/agentkit_deploy/settings.txt` 文件，配置以下两个项：
 
 ```
-ARK_API_KEY=your_api_key_here
-LAS_API_KEY=your_api_key_here
+AGENT_MODEL_API_KEY=your_api_key_here
+TOOL_LAS_API_KEY=your_api_key_here
 ```
 
 ### 2. 项目部署
@@ -101,9 +101,9 @@ streamlit run web/app.py
 
 1. **Q1: 你有哪些数据？**
 2. **Q2: 给我一些样例数据？**
-3. **Q3: Ang Lee 1990 年后有哪些电影？**
-4. **Q4: Ang Lee 的电影海报中哪个有动物？**
-5. **Q5: Life of Pi 的电影海报，变成视频？**
+3. **Q3: Ang Lee 评分超过 7 分的有哪些电影？**
+4. **Q4: Ang Lee 评分超过 7 分的电影中，有哪个电影海报中含有动物？**
+5. **Q5: Life of Pi 的电影海报，变成视频**
 
 ## 运行流程
 

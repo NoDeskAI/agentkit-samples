@@ -46,7 +46,7 @@ def _data_preparation(image_urls: List[str], console: Console) -> tuple:
     """
     数据准备阶段：
     1. 基础校验（image_urls 非空且为列表）
-    2. 获取 LAS_API_KEY 环境变量
+    2. 获取 TOOL_LAS_API_KEY 环境变量
     3. 转换 tos:// 协议的 URL 为 https://
     4. 构建 API 请求所需的 content_items
     
@@ -59,9 +59,9 @@ def _data_preparation(image_urls: List[str], console: Console) -> tuple:
         raise ValueError("image_urls 为空或类型错误")
     
     # 获取 LAS API 密钥
-    las_api_key = os.getenv("LAS_API_KEY")
+    las_api_key = os.getenv("TOOL_LAS_API_KEY")
     if not las_api_key:
-        raise ValueError("缺少 LAS_API_KEY，请在 settings.txt 或环境变量中配置")
+        raise ValueError("缺少 TOOL_LAS_API_KEY，请在 settings.txt 或环境变量中配置")
     
     console.print(f"🎬 准备生成视频: OperatorId={LAS_OPERATOR_ID}, 区域={LAS_REGION}, 图像数={len(image_urls)}")
     
@@ -111,6 +111,7 @@ def _create_task(payload: dict, las_api_key: str, console: Console) -> tuple:
     参数:
     - payload: API 请求 Payload
     - las_api_key: LAS 接口密钥
+    - console: Rich Console 实例，用于打印日志
     
     返回值:
     - task_id: 任务 ID
