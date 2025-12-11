@@ -13,8 +13,8 @@ if __name__ == "__main__":
     app_name = "data_analysis_with_code"
     user_id = "agentkit_user"
     session_id = f"agentkit_sample_session"
-    base_url = ""
-    api_key = ""
+    base_url = "https://sd4t3oidukdd9dols8tlg.apigateway-cn-beijing.volceapi.com"
+    api_key = "NbCUqdEiEy0YkP9qNq0QHRnj5klQBMUVB51g"
     
    
     

@@ -1,17 +1,10 @@
 import os
 import time
 import json
-# 通过 pip install 'volcengine-python-sdk[ark]' 安装方舟SDK
 from volcenginesdkarkruntime import Ark
 
-# 从环境变量中获取 MODEL_AGENT_API_KEY
-api_key = os.getenv("MODEL_AGENT_API_KEY")
-
-# 初始化 Ark 客户端
-client = Ark(
-    base_url="https://ark.cn-beijing.volces.com/api/v3",
-    api_key=api_key
-)
+# 导入工具函数
+from .utils import get_ark_client
 
 def generate_video_from_images(image_url: str):
     """
@@ -24,6 +17,11 @@ def generate_video_from_images(image_url: str):
         return json.dumps({"status": "error", "message": "Missing image_url parameter"}, ensure_ascii=False)
 
     try:
+        # 获取 Ark 客户端
+        client, error_msg = get_ark_client()
+        if error_msg:
+            return json.dumps({"status": "error", "message": error_msg}, ensure_ascii=False)
+        
         # 创建视频生成任务，仅包含 image_url
         create_result = client.content_generation.tasks.create(
             model="doubao-seedance-1-0-lite-i2v-250428",
