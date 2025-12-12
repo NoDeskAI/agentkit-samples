@@ -17,6 +17,11 @@ load_dotenv(
 from veadk import Agent, Runner  # noqa: E402
 from veadk.auth.veauth.ark_veauth import get_ark_token  # noqa: E402
 from veadk.memory.short_term_memory import ShortTermMemory  # noqa: E402
+
+# Check if MODEL_AGENT_API_KEY environment variable exists and is not empty
+if "MODEL_AGENT_API_KEY" not in os.environ or not os.environ["MODEL_AGENT_API_KEY"]:
+    os.environ["MODEL_AGENT_API_KEY"] = get_ark_token()
+
 from veadk.tools.builtin_tools.video_generate import video_generate  # noqa: E402
 from agentkit.apps import AgentkitAgentServerApp  # noqa: E402
 
@@ -26,11 +31,6 @@ from tools.duckdb_sql_execution import duckdb_sql_execution  # noqa: E402
 from tools.lancedb_hybrid_execution import lancedb_hybrid_execution  # noqa: E402
 from prompts import SYSTEM_PROMPT  # noqa: E402
 
-# Check if MODEL_AGENT_API_KEY environment variable exists and is not empty
-if "MODEL_AGENT_API_KEY" not in os.environ or not os.environ["MODEL_AGENT_API_KEY"]:
-    os.environ["MODEL_AGENT_API_KEY"] = get_ark_token()
-# Optionally assign to a variable for easier use in the file
-MODEL_AGENT_API_KEY = os.environ["MODEL_AGENT_API_KEY"]
 
 short_term_memory = ShortTermMemory(backend="local")
 
