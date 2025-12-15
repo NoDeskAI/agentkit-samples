@@ -22,4 +22,5 @@ repos:
       args:
         - markdownlint-cli2
       language: system
+      exclude: '(^|/)\.venv/'
       pass_filenames: false
