@@ -10,7 +10,8 @@
   "ignores": [
     "01-tutorials/workshop/README.md",
     "01-tutorials/README.md",
-    "02-use-cases/beginner/README.md"
+    "02-use-cases/beginner/README.md",
+    "**/.venv/**"
   ],
   "config": {
     // allow HTML
