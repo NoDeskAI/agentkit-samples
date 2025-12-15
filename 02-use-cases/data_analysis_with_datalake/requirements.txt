@@ -1,9 +1,9 @@
-veadk-python
-veadk-python[extensions]
-google-adk
+veadk-python==0.2.27
+veadk-python[extensions]==0.2.27
+google-adk==1.18.0
 python-dotenv
 lancedb
-agentkit-sdk-python
-volcengine-python-sdk[ark]
+agentkit-sdk-python==0.1.15
+volcengine-python-sdk[ark]==4.0.33
 pyarrow
 duckdb
