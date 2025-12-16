@@ -8,14 +8,31 @@
 
 ## 核心功能
 
-- **身份认证**：支持 OAuth2.0 协议，可集成飞书、Google 等身份源。
-- **授权**：基于角色的访问控制（RBAC），支持细粒度权限配置。
-- **凭证托管**：智能体运行时可自动获取和刷新 AK/SK，无需手动管理。
-- **细粒度权限**：支持对 API 调用、资源操作进行权限控制。
+- **身份认证**：支持 OAuth2.0/OIDC/SAML 协议，可集成飞书、Coze 等身份源。
+- **权限控制**：基于策略的访问控制（PBAC），支持细粒度权限配置。
+- **凭证托管**：智能体运行时可自动托管，获取和刷新凭据，无需手动管理。
+
+## Agent能力
+- Identity
 
 ---
 
-### 2️⃣ 前置准备
+## 目录结构说明
+session3
+├──E3_lark_doc                   # 实验3：学习如何使用Agent Identity产品来安全的托管外部服务（本实验以飞书文档为例）的访问凭证，以允许智能体安全无感的访问下游资源。
+├──E4_volc_ops                   # 实验4：学习如何使用Agent Identity产品来安全的托管火山资源（本实验以MCP市场的ECS运维工具为例）的访问凭证，以允许智能体安全无感的访问下游资源。
+├──E5_ops_knowledgebase          # 实验5：学习如何使用Agent Identity产品来安全的托管火山资源（本实验以MCP市场的ECS运维工具为例）的访问凭证，以允许智能体安全无感的访问下游资源。
+├──E6a_mail_ast_with_guard       # 实验6：这是一项预览功能，可以体验使用Agent Identity产品在智能体运行时根据智能体的运行上下文，动态为智能体赋予运行时最小权限，为用户提供更强化的智能体权限管控能力。
+├──E6b_mail_ast_without_guard    # 实验6：同上，但该实验不开启guard的智能体
+├──.env.template                 # 配置文件示例，您可以根据需要修改
+├──.pre-commit-config.yaml       # 代码提交前的校验配置文件
+├──LICENSE                       # 项目开源协议
+├──pyproject.toml                # 项目依赖管理文件
+├──README.md                     # 项目说明文档
+
+## 本地运行
+
+### 前置准备
 
 | 项目 | 说明 | 操作 |
 |------|------|------|
@@ -23,17 +40,16 @@
 | **飞书账号** | 需要能够查看或配置 **飞书开放平台**（<https://open.feishu.cn/app>），以便创建/授权应用（参考下文配置） | 加入 `火山 AgentKit Identity（内部测试）` 组织：<code>https://identity.feishu.cn/invite/member/_oF71wu7U3w</code> |
 | **本地环境** | Git、PowerShell / Bash、`uv`（Python 环境管理） | 参考下文安装步骤 |
 
----
 
-### 3️⃣ 环境搭建
+### 依赖安装
 
-#### 3.1 拉取代码
+#### 拉取代码
 ```bash
 git clone https://github.com/volcengine/agentkit-samples.git
 cd agentkit-samples/01-tutorials/workshop/session3
 ```
 
-#### 3.2 安装 `uv`（推荐国内镜像）
+#### 安装 `uv`（推荐国内镜像）
 ```bash
 # Linux/macOS
 curl -LsSf https://force-workshop.tos-cn-beijing.volces.com/uv-latest/uv-installer.sh | sh
@@ -42,7 +58,7 @@ curl -LsSf https://force-workshop.tos-cn-beijing.volces.com/uv-latest/uv-install
 irm https://force-workshop.tos-cn-beijing.volces.com/uv-latest/uv-installer.ps1 | iex
 ```
 
-#### 3.3 创建并同步 Python 3.12 虚拟环境
+#### 创建并同步 Python 3.12 虚拟环境
 ```bash
 export UV_PYTHON_INSTALL_MIRROR=https://force-workshop.tos-cn-beijing.volces.com/python-build-standalone
 export UV_INDEX_URL=https://pypi.tuna.tsinghua.edu.cn/simple/
@@ -50,7 +66,9 @@ uv venv --python 3.12
 uv sync --force-reinstall
 ```
 
-#### 3.4 增加火山角色
+### 环境准备
+
+#### 增加火山角色
 
 1. **打开角色管理页面**
    <https://console.volcengine.com/iam/identitymanage/role>
@@ -81,7 +99,7 @@ uv sync --force-reinstall
 
    - 将该 TRN **复制并记录**（后续 `.env` 或代码中需要使用）。
 
-#### 3.5 配置用户池和客户端
+#### 配置用户池和客户端
 
 1. **打开用户池列表**
    访问 <https://console.volcengine.com/identity/region:identity+cn-beijing/user-pools?projectName=default>。
@@ -110,7 +128,7 @@ uv sync --force-reinstall
    - 记录用户池详情中的外部身份提供商回调 URL **OAuth 注册回调地址**、**OAuth 登录回调地址**，后续将填写**飞书开放平台应用**中。
    - **注意**：`Client Secret` 仅用于本地开发，请勿提交到代码仓库。
 
-### 3.6 配置飞书应用
+#### 配置飞书应用
 
 1. **创建飞书应用**
    - 访问 <https://open.feishu.cn/app/>，点击 **「创建应用」**，填写名称、描述等信息后提交。
@@ -145,7 +163,7 @@ uv sync --force-reinstall
    - 完成上述配置后，点击 **「保存」**。
    - 前往 **「凭证与基础信息」** 页面，记录下 **`App ID`** 与 **`App Secret`**。
 
-### 3.7 配置外部身份供应商
+#### 配置外部身份供应商
 
 1. **打开身份管理控制台**
    访问 <https://console.volcengine.com/identity/region:identity+cn-beijing> 并登录。
@@ -179,7 +197,28 @@ uv sync --force-reinstall
    - 点击 **「确认」** 完成创建。
    - 记录下 **供应商 ID**（后续在代码或配置文件中可能需要使用）。
 
-### 3.9 配置 `.env`
+#### 配置凭据管理（Outbound Credentials）
+
+1. **打开凭据管理页面**
+   访问 <https://console.volcengine.com/identity/region:identity+cn-beijing/outbound-credentials>。
+
+2. **新建凭据**
+   - 点击 **「新建凭据」**，在弹窗中选择 **「OAuthClient」** 类型。
+
+3. **填写 OAuth 客户端信息**
+   - **客户端 ID**：填写 **飞书应用的 App ID**（与 3.7 中保持一致）。
+   - **客户端密码**：填写 **飞书应用的 App Secret**。
+   - **权限范围（Scope）**：同样填入
+     ```
+     contact:user.base:readonly,contact:contact.base:readonly
+     ```
+
+4. **完成创建**
+   - 确认信息无误后点击 **「确认」**。
+
+### 调试方法
+
+#### 配置 `.env`
 
 在项目根目录新建（或编辑）**`.env`** 文件，将以下变量填入对应的值。每个变量的获取来源已在前面的章节标注，确保在填写前已完成相应的配置步骤。
 
@@ -207,7 +246,7 @@ ADAPTIVE_PERMISSION_SERVICE_KEY=    # ⑩ 细粒度权限服务 Key（平台分�
 # 如有额外的环境变量，可在此处继续添加
 ```
 
-#### 填写要点
+##### 填写要点
 
 1. **`ADK_OAUTH2_USERPOOL_UID`**
    - 进入 **火山 Identity 控制台 → 用户池**，在用户池列表中点击目标池，URL 中的 `uid` 即为该值。
@@ -225,41 +264,13 @@ ADAPTIVE_PERMISSION_SERVICE_KEY=    # ⑩ 细粒度权限服务 Key（平台分�
 5. **`DATABASE_VIKING_BASE_URL`** 与 **`ADAPTIVE_PERMISSION_SERVICE_KEY`**
    - 这两项通常由实验组织者提供，若自行部署请填入对应服务的访问地址与密钥。
 
-#### 保存与安全
-
-- **务必** 将 `.env` 文件加入 `.gitignore`，防止凭证泄露。
-- 在 CI/CD 环境中，推荐使用 **GitHub Secrets / GitLab CI Variables** 或公司内部密钥管理系统来注入这些变量，而不是直接提交到仓库。
-
-完成上述填写后，运行项目即可读取到所有必要的配置信息。祝实验顺利 🚀！
-
 ---
 
-### 3.8 配置凭据管理（Outbound Credentials）
-
-1. **打开凭据管理页面**
-   访问 <https://console.volcengine.com/identity/region:identity+cn-beijing/outbound-credentials>。
-
-2. **新建凭据**
-   - 点击 **「新建凭据」**，在弹窗中选择 **「OAuthClient」** 类型。
-
-3. **填写 OAuth 客户端信息**
-   - **客户端 ID**：填写 **飞书应用的 App ID**（与 3.7 中保持一致）。
-   - **客户端密码**：填写 **飞书应用的 App Secret**。
-   - **权限范围（Scope）**：同样填入
-     ```
-     contact:user.base:readonly,contact:contact.base:readonly
-     ```
-
-4. **完成创建**
-   - 确认信息无误后点击 **「确认」**。
-
----
-
-### 4️⃣ 实验列表 & 操作步骤
+### 调试方法
 
 > **⚡️ 所有实验均在同一目录下运行，若已启动应用可直接跳到对应实验步骤。**
 
-#### 4.1 实验 1 – 用户池登录智能体
+#### 实验 1 – 用户池登录智能体
 1. 启动服务
    ```bash
    uv run veadk web
@@ -269,26 +280,30 @@ ADAPTIVE_PERMISSION_SERVICE_KEY=    # ⑩ 细粒度权限服务 Key（平台分�
 4. 首次登录需修改密码并完成短信验证码。
 5. 授权后即可进入 Agent 应用页面。
 
-#### 4.2 实验 2 – 飞书 IdP 联合登录
+#### 实验 2 – 飞书 IdP 联合登录
 1. 同实验 1 启动服务（若已运行可跳过）。
 2. 在登录页点击 **“使用飞书登录”** → 跳转飞书授权页面 → **授权** → 返回 Agent 并 **允许访问**。
 3. 成功后即可使用飞书身份访问智能体。
 
-#### 4.3 实验 3 – 安全托管飞书文档凭证
+#### 实验 3 – 安全托管飞书文档凭证
 1. 登录 **Agent Identity 控制台 → 凭证托管**，查看已预置的 `feishu` Provider（无需手动创建）。
 2. 启动服务并打开 Agent。
 3. 选择 **E3_lark_doc** Agent，输入
-   ```
+   ```text
    为我总结文档内容：https://icncjgc0bh0b.feishu.cn/docx/WmlQdfqiNoB1CqxHtKMcdJfonBd
    ```
 4. 按提示完成飞书授权，即可得到文档摘要。
 
-#### 4.4 实验 4 – 安全托管火山资源（ECS）凭证
+
+#### 实验 4 – 安全托管火山资源（ECS）凭证
+
 1. 登录 **凭证托管**，查看 `ecs‑oauth‑provider`（已预置）。
 2. 启动服务 → 选择 **E4_volc_ops** Agent，输入查询指令（如 “我有哪些 ECS？”）。
 3. 完成火山登录与授权后，Agent 将返回 ECS 列表。
 
-#### 4.5 实验 5 – 静态细粒度权限策略
+
+#### 实验 5 – 静态细粒度权限策略
+
 1. 登录 **Agent Identity 控制台 → 用户池**，记录当前登录用户的 **User ID**。
 2. 在 **权限策略** 页面，新建策略：
    - **效果**：允许
@@ -297,26 +312,16 @@ ADAPTIVE_PERMISSION_SERVICE_KEY=    # ⑩ 细粒度权限服务 Key（平台分�
    - **资源**：`knowledgebase document` → `production_credential.md`
 3. 保存后，在 **E5_ops_knowledgebase** Agent 中查询 “生产服务器如何登录？” 即可看到授权成功的结果。
 
-#### 4.6 实验 6 – 动态权限围栏（预览功能）
+
+#### 实验 6 – 动态权限围栏（预览功能）
+
 1. 启动服务 → 选择 **E6a_mail_ast_with_guard**（开启动态围栏）或 **E6b_mail_ast_without_guard**（未开启）。
 2. 按提示输入邮件地址、关键词、转发目标。
 3. 观察 **Event 窗口** 中 `customMetaData.permissions`，验证是否 **阻断** 攻击邮件（`user2@example.com`）或 **放行** 正常邮件（`user1@example.com`）。
 
----
 
-### 5️⃣ 常见问题 & 排查
+#### 清理资源
 
-| 场景 | 可能原因 | 解决办法 |
-|------|----------|----------|
-| **启动后无日志输出** | `uv` 环境未激活或依赖未安装 | 确认 `uv sync` 成功，重新执行 `uv run veadk web` |
-| **登录页面一直跳转** | 浏览器缓存或未正确创建用户 | 清除浏览器缓存或重新创建用户（实验 1） |
-| **飞书授权失败** | 组织邀请未生效或账号未绑定 | 重新加入组织链接，确认飞书账号已绑定组织 |
-| **凭证托管页面 404** | IAM 子账号权限不足 | 使用组委会提供的子账号登录控制台 |
-| **动态权限未生效** | 使用了 **E6b**（未开启）或浏览器阻止弹窗 | 切换到 **E6a**，确保浏览器允许弹窗 |
-
----
-
-### 6️⃣ 清理资源
 ```bash
 # 删除本地虚拟环境
 rm -rf .venv
@@ -326,11 +331,32 @@ cd .. && rm -rf agentkit-samples
 ```
 > 如在火山控制台创建了 **用户、策略、凭证 Provider**，请在对应页面手动删除，避免产生额外费用。
 
----
+## AgentKit 部署
 
-### 7️⃣ 参考文档
-- **智能体身份课程 - 可信身份链和细粒度权限管控**（完整实验手册）
+暂无
 
----
 
-祝实验顺利 🎉！
+## 示例提示词
+
+暂无
+
+
+## 效果展示
+
+待补充
+
+
+## 常见问题
+
+| 场景 | 可能原因 | 解决办法 |
+|------|----------|----------|
+| **启动后无日志输出** | `uv` 环境未激活或依赖未安装 | 确认 `uv sync` 成功，重新执行 `uv run veadk web` |
+| **登录页面一直跳转** | 浏览器缓存或未正确创建用户 | 清除浏览器缓存或重新创建用户（实验 1） |
+| **飞书授权失败** | 组织邀请未生效或账号未绑定 | 重新加入组织链接，确认飞书账号已绑定组织 |
+| **凭证托管页面 404** | IAM 子账号权限不足 | 使用组委会提供的子账号登录控制台 |
+| **动态权限未生效** | 使用了 **E6b**（未开启）或浏览器阻止弹窗 | 切换到 **E6a**，确保浏览器允许弹窗 |
+
+
+## 代码许可
+
+本工程遵循 Apache 2.0 License
