@@ -44,14 +44,14 @@ LLM 生成回答
 
 ```python
 # 准备知识源
-with open("/tmp/tech.txt", "w") as f:
-    f.write("Python: programming language\nJavaScript: web development")
-with open("/tmp/products.txt", "w") as f:
-    f.write("Laptop: $1200\nPhone: $800\nTablet: $600")
+with open("/tmp/product_info.txt", "w") as f:
+    f.write("产品清单及价格：\n1. 高性能笔记本电脑 (Laptop Pro) - 价格：8999元...")
+with open("/tmp/service_policy.txt", "w") as f:
+    f.write("售后服务政策：\n1. 质保期：所有电子产品提供1年免费质保...")
 
 # 创建知识库
 kb = KnowledgeBase(backend="viking", app_name="test_app")
-kb.add_from_files(files=["/tmp/tech.txt", "/tmp/products.txt"])
+kb.add_from_files(files=["/tmp/product_info.txt", "/tmp/service_policy.txt"])
 ```
 
 **Agent 配置**（[agent.py](https://github.com/volcengine/agentkit-samples/blob/main/02-use-cases/beginner/vikingdb/agent.py#L31-L36)）：
@@ -138,8 +138,6 @@ export MODEL_AGENT_NAME=doubao-seed-1-6-251015
 # 火山引擎访问凭证（必需）
 export VOLCENGINE_ACCESS_KEY=<Your Access Key>
 export VOLCENGINE_SECRET_KEY=<Your Secret Key>
-# bucket需要用来上传本地文件，进而将文件从tos导入到知识库中
-export DATABASE_TOS_BUCKET=agentkit-platform-{{your_account_id}} 
 ```
 
 ### 调试方法
@@ -198,14 +196,18 @@ uv run agent.py
 ```bash
 # 进入到vikingdb目录
 
-# 配置部署参数
-agentkit config
+# 配置部署参数,DATABASE_TOS_BUCKET环境变量需要传入到Agent中，用来上传本地文件到TOS，进而将文件从TOS导入到知识库中
+agentkit config \
+--agent_name vikingdb_agnet \
+--entry_point 'agent.py' \
+--runtime_envs DATABASE_TOS_BUCKET=agentkit-platform-2107625663 \
+--launch_type cloud
 
 # 启动云端服务
 agentkit launch
 
 # 测试部署的 Agent
-agentkit invoke 'What is Python?'
+agentkit invoke '高性能笔记本电脑PRO的价钱是多少'
 
 # 或使用 client.py 连接云端服务
 # 需要编辑 client.py，将其中的第 14 行和第 15 行的 base_url 和 api_key 修改为 agentkit.yaml 中生成的 runtime_endpoint 和 runtime_apikey 字段
@@ -215,28 +217,28 @@ uv run client.py
 
 ## 示例提示词
 
-### 技术知识查询
+### 产品信息查询
 
-**基于 tech.txt 的检索回答**：
+**基于 product_info.txt 的检索回答**：
 
 ```text
-用户：What is Python?
-Agent：Python is a programming language.
+用户：高性能笔记本Pro的价钱是多少？
+Agent：根据产品清单，高性能笔记本电脑 (Laptop Pro) 的价格是 8999 元。
 
-用户：What is JavaScript used for?
-Agent：JavaScript is primarily used for web development.
+用户：这里最便宜的产品是什么？
+Agent：最便宜的产品是平板电脑 (Tablet Air)，价格为 2999 元。
 ```
 
-### 产品价格查询
+### 售后服务查询
 
-**基于 products.txt 的数据检索**：
+**基于 service_policy.txt 的数据检索**：
 
 ```text
-用户：Which is more expensive, Laptop or Phone?
-Agent：Laptop is more expensive. It costs $1200, while Phone costs $800.
+用户：你们的退换货政策是怎样的？
+Agent：根据售后服务政策，购买后 7 天内支持无理由退货，15 天内如有质量问题可以换货。
 
-用户：What's the cheapest product?
-Agent：The cheapest product is Tablet at $600.
+用户：笔记本电脑保修多久？
+Agent：所有电子产品均提供 1 年免费质保。
 ```
 
 ### 上下文关联查询
@@ -244,8 +246,8 @@ Agent：The cheapest product is Tablet at $600.
 **复用前文上下文的连续问答：**
 
 ```text
-用户：What's the price difference with the cheapest one?
-Agent：The Laptop is $600 more expensive than the cheapest product (Tablet).
+用户：那 SmartPhone X 呢？
+Agent：SmartPhone X 的价格是 4999 元。
 ```
 
 ### 复合查询
@@ -253,8 +255,8 @@ Agent：The Laptop is $600 more expensive than the cheapest product (Tablet).
 **跨文档的综合查询：**
 
 ```text
-用户：I want to learn Python, do you have any related products?
-Agent：Based on our documents, Python is a programming language. We have a Laptop ($1200) which would be suitable for programming.
+用户：我想买一台用来办公和娱乐的设备，有什么推荐并告诉我售后保障？
+Agent：推荐您使用平板电脑 (Tablet Air)，它轻薄便携，适合办公娱乐，价格为 2999 元。售后方面，我们提供 1 年免费质保，且支持 7 天无理由退货。
 ```
 
 ## 效果展示
