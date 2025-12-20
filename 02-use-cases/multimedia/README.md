@@ -51,8 +51,8 @@
 
 ```bash
 # 克隆代码仓库
-git clone https://github.com/volcengine/veadk-ecommerce-video.git
-cd veadk-ecommerce-video
+git clone https://github.com/volcengine/agentkit-samples.git
+cd agentkit-samples/02-use-cases/multimedia
 
 # 安装项目依赖
 uv sync --index-url https://pypi.tuna.tsinghua.edu.cn/simple
