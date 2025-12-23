@@ -34,7 +34,7 @@ NaviGo AI Agent
 
 ### 代码特点
 
-**Agent 定义**（[agent.py](https://github.com/volcengine/agentkit-samples/blob/main/02-use-cases/beginner/realtime_voice/agent.py#L43-L48)）：
+**Agent 定义**（[agent.py](https://github.com/volcengine/agentkit-samples/blob/main/02-use-cases/beginner/realtime_voice/agent.py#L38-L42)）：
 
 ```python
 
@@ -47,7 +47,7 @@ agent = Agent(
 
 ```
 
-**语音配置**（[agent.py](https://github.com/volcengine/agentkit-samples/blob/main/02-use-cases/beginner/realtime_voice/agent.py#L78-L90)）：
+**语音配置**（[agent.py](https://github.com/volcengine/agentkit-samples/blob/main/02-use-cases/beginner/realtime_voice/agent.py#L72-L84)）：
 
 ```python
 # Create run config with audio settings
@@ -162,7 +162,7 @@ uv run agent.py
 
 **运行效果**：
 
-![NaviGo AI](../../assets/images/navigo_ai.png)
+![NaviGo AI](../../../assets/images/navigo_ai.png)
 
 ## AgentKit 部署
 
