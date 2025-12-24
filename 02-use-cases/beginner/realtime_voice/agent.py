@@ -65,6 +65,9 @@ class StreamingService(BaseStreamServer):
             agent=self.agent,
             session_service=self.session_service,
         )
+        stream_logger.info(
+            f"RealtimeVoice model: {DoubaoRealtimeVoice.model_config}"
+        )
 
         # Create live request queue
         live_request_queue = LiveRequestQueue()
