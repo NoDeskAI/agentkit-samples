@@ -14,7 +14,9 @@
 
 import uuid
 
+from agentkit.apps import AgentkitAgentServerApp
 from veadk import Agent
+from veadk.memory import ShortTermMemory
 from veadk.runner import Runner
 from veadk.tools.builtin_tools.image_generate import image_generate
 from veadk.tools.builtin_tools.video_generate import video_generate
@@ -54,14 +56,12 @@ async def main(prompts: list[str]):
         print(response)
 
 
-if __name__ == "__main__":
-    import asyncio
+short_term_memory = ShortTermMemory(backend="local")
 
-    response = asyncio.run(
-        main(
-            [
-                "请生成古文片段 落霞与孤鹜齐飞，秋水共长天一色 的首帧图片",
-                "刚才的首帧图，生成视频。",
-            ]
-        )
-    )
+agent_server_app = AgentkitAgentServerApp(
+    agent=root_agent,
+    short_term_memory=short_term_memory,
+)
+
+if __name__ == "__main__":
+    agent_server_app.run(host="0.0.0.0", port=8000)
