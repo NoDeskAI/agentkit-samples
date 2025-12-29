@@ -61,21 +61,22 @@ def main(argv: list[str] | None = None) -> int:
     repo_root = Path(__file__).resolve().parent.parent
     use_cases_dir = repo_root / "02-use-cases"
 
-    completed = subprocess.run(
-        [
-            "git",
-            "diff",
-            "--cached",
-            "--name-only",
-            "--diff-filter=ACMRT",
-        ],
-        capture_output=True,
-        text=True,
-        cwd=str(repo_root),
-    )
-    staged_files = {
-        line.strip() for line in completed.stdout.splitlines() if line.strip()
-    }
+    diff_commands = [
+        ["git", "diff", "--name-only", "--diff-filter=ACMRT"],
+        ["git", "diff", "--cached", "--name-only", "--diff-filter=ACMRT"],
+    ]
+
+    changed_files: set[str] = set()
+    for cmd in diff_commands:
+        completed = subprocess.run(
+            cmd,
+            capture_output=True,
+            text=True,
+            cwd=str(repo_root),
+        )
+        changed_files.update(
+            line.strip() for line in completed.stdout.splitlines() if line.strip()
+        )
 
     failed = False
 
@@ -92,7 +93,7 @@ def main(argv: list[str] | None = None) -> int:
         if use_cases_dir not in path.parents:
             continue
 
-        if str(rel) not in staged_files:
+        if str(rel) not in changed_files:
             continue
 
         post = frontmatter.load(path)
