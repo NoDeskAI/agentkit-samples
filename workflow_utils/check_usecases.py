@@ -80,8 +80,6 @@ def main() -> None:
             "v1.0.0",
             "--cr_repo_name",
             agent_name,
-            "--runtime_name",
-            agent_name,
             "--region",
             "cn-beijing",
         ]
