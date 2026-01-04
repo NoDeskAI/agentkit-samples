@@ -49,7 +49,8 @@ def before_model_callback(
                             text="很抱歉，您发送的内容包含不当言论，我无法处理。"
                         )
                     ],
-                )
+                ),
+                partial=True,
             )
 
     # **请求修改功能**：为系统指令添加前缀
