@@ -33,13 +33,13 @@ AgentKit 运行时
 
 ## Agent 能力
 
-| 组件 | 描述 |
-| - | - |
-| **Agent 服务** | [`agent.py`](agent.py) - 主应用程序,通过 `AgentkitAgentServerApp` 实现子智能体编排 |
-| **CRM 工具** | [`tools/crm_mock.py`](tools/crm_mock.py) - 模拟 CRM API,提供客户信息、购买、保修和工单增删改查 |
-| **知识库** | [`pre_build/knowledge/`](pre_build/knowledge/) - 产品指南、政策文档和故障排查文档 |
-| **短期记忆** | 本地会话上下文,保持对话连续性 |
-| **长期记忆** | Viking 向量数据库或 Mem0,持久化用户历史记录 |
+| 组件                 | 描述                                                                                          |
+| -------------------- | --------------------------------------------------------------------------------------------- |
+| **Agent 服务** | [`agent.py`](agent.py) - 主应用程序,通过 `AgentkitAgentServerApp` 实现子智能体编排           |
+| **CRM 工具**   | [`tools/crm_mock.py`](tools/crm_mock.py) - 模拟 CRM API,提供客户信息、购买、保修和工单增删改查 |
+| **知识库**     | [`pre_build/knowledge/`](pre_build/knowledge/) - 产品指南、政策文档和故障排查文档              |
+| **短期记忆**   | 本地会话上下文,保持对话连续性                                                                 |
+| **长期记忆**   | Viking 向量数据库或 Mem0,持久化用户历史记录                                                   |
 
 ## 目录结构说明
 
@@ -72,24 +72,24 @@ customer_support/
 1. 登录 [火山引擎控制台](https://console.volcengine.com)
 2. 进入"访问控制" → "用户" -> 新建用户 或 搜索已有用户名 -> 点击用户名进入"用户详情" -> 进入"密钥" -> 新建密钥 或 复制已有的 AK/SK
    - 如下图所示
-   ![Volcengine AK/SK Management](../../assets/images/volcengine_aksk.jpg)
+     ![Volcengine AK/SK Management](../../assets/images/volcengine_aksk.jpg)
 3. 为用户配置 AgentKit运行所依赖服务的访问权限:
    - 在"用户详情"页面 -> 进入"权限" -> 点击"添加权限"，将以下策略授权给用户
      - `AgentKitFullAccess`（AgentKit 全量权限）
      - `APMPlusServerFullAccess`（APMPlus 全量权限）
 4. 为用户获取火山方舟模型 Agent API Key
    - 登陆[火山方舟控制台](https://console.volcengine.com/ark/region:ark+cn-beijing/overview?briefPage=0&briefType=introduce&type=new)
-   - 进入"API Key管理" -> 创建 或 复制已有的 API Key，后续`MODEL_AGENT_API_KEY`环境变量需要配置为该值
+   - 进入"API Key管理" -> 创建 或 复制已有的 API Key，后续 `MODEL_AGENT_API_KEY`环境变量需要配置为该值
    - 如下图所示
-   ![Ark API Key Management](../../assets/images/ark_api_key_management.jpg)
+     ![Ark API Key Management](../../assets/images/ark_api_key_management.jpg)
 5. 开通模型预置推理接入点
    - 登陆[火山方舟控制台](https://console.volcengine.com/ark/region:ark+cn-beijing/overview?briefPage=0&briefType=introduce&type=new)
    - 进入"开通管理" -> "语言模型" -> 找到相应模型 -> 点击"开通服务"
    - 确认开通，等待服务生效（通常1-2分钟）
-   - 开通本案例中使用到的以下模型（您也可以根据实际需求开通其他模型的预置推理接入点，并在`agent.py`代码中指定使用的模型）
-      - `deepseek-v3-1-terminus`
+   - 开通本案例中使用到的以下模型（您也可以根据实际需求开通其他模型的预置推理接入点，并在 `agent.py`代码中指定使用的模型）
+     - `deepseek-v3-1-terminus`
    - 如下图所示
-   ![Ark Model Service Management](../../assets/images/ark_model_service_management.jpg)
+     ![Ark Model Service Management](../../assets/images/ark_model_service_management.jpg)
 
 **知识库(首次运行自动配置)：**:
 
@@ -124,9 +124,9 @@ uv pip install -r requirements.txt
 设置以下环境变量:
 
 ```bash
-export VOLCENGINE_ACCESS_KEY=AK
-export VOLCENGINE_SECRET_KEY=SK
-export DATABASE_TOS_BUCKET=agentkit-platform-{{your_account_id}}
+export VOLCENGINE_ACCESS_KEY={your_ak}
+export VOLCENGINE_SECRET_KEY={your_sk}
+export DATABASE_TOS_BUCKET={your_tos_bucket}
 
 # 可选: 使用已有知识库
 export DATABASE_VIKING_COLLECTION=<existing_knowledge_index>
@@ -144,31 +144,24 @@ export DATABASE_MEM0_API_KEY=<mem0_api_key>
 **环境变量说明:**
 
 - `DATABASE_TOS_BUCKET`: 用于自动知识库初始化所需。若未设置 `DATABASE_VIKING_COLLECTION`，首次运行会将 `pre_build/knowledge` 自动上传至 TOS 并导入 Viking 向量库。
-  - 格式: `DATABASE_TOS_BUCKET=agentkit-platform-{{your_account_id}}`
+  - 格式: `DATABASE_TOS_BUCKET={your_tos_bucket}`
   - 示例: `DATABASE_TOS_BUCKET=agentkit-platform-12345678901234567890`
-  - 其中`{{your_account_id}}`需要替换为您的火山引擎账号 ID
-- `DATABASE_VIKING_COLLECTION`: 预创建的知识库集合名称 (生产环境推荐)
+- `DATABASE_VIKING_COLLECTION`: 预创建的知识库集合名称 (生产环境推荐 在AgentKit 控制台手动创建知识库并设置集合名称)
 - 模型默认为 `deepseek-v3-1-terminus` ，如需更改可在代码中调整。
+
+> 如何创建 TOS桶 [参考](https://www.volcengine.com/docs/6349/75024?lang=zh)
 
 ## 本地运行
 
 使用 `veadk web` 进行本地调试:
+
 > `veadk web`是一个基于 FastAPI 的 Web 服务，用于调试 Agent 应用。运行该命令时，会启动一个web服务器，这个服务器会加载并运行您的 agentkit 智能体代码，同时提供一个聊天界面，您可以在聊天界面与智能体进行交互。在界面的侧边栏或特定面板中，您可以查看智能体运行的细节，包括思考过程（Thought Process）、工具调用（Tool calls）、模型输入/输出。
 
 ```bash
 # 1. 进入上级目录
 cd 02-use-cases
 
-# 2. 可选: 创建 .env 文件 (如果已设置环境变量可跳过)
-touch .env
-echo "VOLCENGINE_ACCESS_KEY=AK" >> .env
-echo "VOLCENGINE_SECRET_KEY=SK" >> .env
-# 推荐: 在 AgentKit 控制台手动创建知识库并设置集合名称
-echo "DATABASE_VIKING_COLLECTION=agentkit_customer_support" >> .env
-# 可选: 如果使用自动初始化,设置 TOS 存储桶用于上传知识库文件
-echo "DATABASE_TOS_BUCKET=agentkit-platform-{{your_account_id}}" >> .env
-
-# 3. 启动 Web 界面
+# 2. 启动 Web 界面
 veadk web
 ```
 
@@ -208,7 +201,7 @@ cd 02-use-cases/customer_support
 agentkit config \
 --agent_name customer_support \
 --entry_point 'agent.py' \
---runtime_envs DATABASE_TOS_BUCKET=agentkit-platform-{{your_account_id}} \
+--runtime_envs DATABASE_TOS_BUCKET={your_tos_bucket} \
 --launch_type cloud
 
 # 3. 部署到运行时

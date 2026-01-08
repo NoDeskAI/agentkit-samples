@@ -83,8 +83,8 @@ AgentKit 运行时
    - 搜索"火山方舟"产品，点击进入控制台
    - 进入"开通管理" -> "语言模型" -> 找到相应模型 -> 点击"开通服务"
    - 开通本案例中使用到的以下模型
-     - root_agent模型：`deepseek-v3-1-terminus`
-     - 生图模型：`doubao-seedream-4-0-250828`
+     - root_agent模型：`deepseek-v3-2-251201`
+     - 生图模型：`doubao-seedream-4-5-251128`
      - 生视频模型：`doubao-seedance-1-0-pro-250528`
    - 如下图所示
      ![Ark Model Service Management](../img/ark_model_service_management.jpg)
@@ -112,19 +112,24 @@ uv sync --index-url https://pypi.tuna.tsinghua.edu.cn/simple
 ```bash
 export VOLCENGINE_ACCESS_KEY={your_ak}
 export VOLCENGINE_SECRET_KEY={your_sk}
-export DATABASE_TOS_BUCKET=agentkit-platform-{{your_account_id}}
-export MODEL_AGENT_API_KEY={{your_model_agent_api_key}} # 从火山方舟获取，本地调试必传
+export DATABASE_TOS_BUCKET={your_tos_bucket}
+export MODEL_AGENT_API_KEY={your_model_agent_api_key}
 
 # 可选: 指定下载目录 (默认为项目根目录)
 export DOWNLOAD_DIR=/tmp
 ```
 
-**TOS 存储桶配置:**
+**环境变量说明:**
 
-- 默认存储桶: `agentkit-platform-{{your_account_id}}`
-  - 其中 `{{your_account_id}}`需要替换为您的火山引擎账号 ID
+- `VOLCENGINE_ACCESS_KEY`: 火山引擎访问凭证的 Access Key
+- `VOLCENGINE_SECRET_KEY`: 火山引擎访问凭证的 Secret Key
+- `DATABASE_TOS_BUCKET`: 用于存放最终生成的完整视频的 TOS 存储桶名称
+  - 格式: `DATABASE_TOS_BUCKET={your_tos_bucket}`
   - 示例: `DATABASE_TOS_BUCKET=agentkit-platform-12345678901234567890`
-- 若需自定义,可在 [`tool/tos_upload.py`](tool/tos_upload.py) 中修改 `bucket_name` 参数或在工具调用时传入
+- `AGENTKIT_TOOL_ID`: 从 AgentKit 控制台获取的工具 ID
+- `MODEL_AGENT_API_KEY`: 从火山方舟获取的模型 Agent API Key
+
+> 如何创建 TOS桶 [参考](https://www.volcengine.com/docs/6349/75024?lang=zh)
 
 ## 本地运行
 

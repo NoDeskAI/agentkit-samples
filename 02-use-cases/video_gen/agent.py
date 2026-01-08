@@ -26,6 +26,7 @@ from google.adk.tools.mcp_tool.mcp_toolset import (
 from veadk import Runner
 from veadk.agent_builder import AgentBuilder
 from veadk.memory.short_term_memory import ShortTermMemory
+from consts import set_veadk_environment_variables
 
 # 建议通过logging.basicConfig设置全局logger，默认Log级别为INFO
 logging.basicConfig(level=logging.INFO)
@@ -36,6 +37,9 @@ sys.path.append(str(Path(__file__).resolve().parent))
 
 # 上层目录
 sys.path.append(str(Path(__file__).resolve().parent.parent))
+
+# env
+set_veadk_environment_variables()
 
 app_name = "storyvideo"
 app = AgentkitSimpleApp()

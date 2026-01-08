@@ -68,6 +68,7 @@
 
 1. 登录 [火山引擎控制台](https://console.volcengine.com)
 2. 进入"访问控制" → "用户" -> 新建用户 或 搜索已有用户名 -> 点击用户名进入"用户详情" -> 进入"密钥" -> 新建密钥 或 复制已有的 AK/SK
+   - 记录 AK/SK，后续 `VOLCENGINE_ACCESS_KEY` 和 `VOLCENGINE_SECRET_KEY`环境变量需要配置为该值
    - 如下图所示
      ![Volcengine AK/SK Management](../../assets/images/volcengine_aksk.jpg)
 3. 为用户配置 AgentKit运行所依赖服务的访问权限:
@@ -84,7 +85,7 @@
    - 进入"开通管理" -> "语言模型" -> 找到相应模型 -> 点击"开通服务"
    - 确认开通，等待服务生效（通常1-2分钟）
    - 开通本案例中使用到的以下模型（您也可以根据实际需求开通其他模型的预置推理接入点，并在 `agent.py`代码中指定使用的模型）
-     - `deepseek-v3-1-terminus`
+     - `deepseek-v3-2-251201`
      - `doubao-seed-1-6-vision-250815`
      - `doubao-seed-1-6-251015`
    - 如下图所示
@@ -101,14 +102,22 @@ pip install -r requirements.txt
 设置以下环境变量:
 
 ```bash
-# 火山引擎AK/SK
-export VOLCENGINE_ACCESS_KEY=AK
-export VOLCENGINE_SECRET_KEY=SK
-# TOS桶名称
-export DATABASE_TOS_BUCKET=agentkit-platform-{{your_account_id}}
-# 大模型API_KEY (可选)
-export MODEL_AGENT_API_KEY=<your_ark_api_key>
+export VOLCENGINE_ACCESS_KEY={your_ak}
+export VOLCENGINE_SECRET_KEY={your_sk}
+export DATABASE_TOS_BUCKET={your_tos_bucket}
+export MODEL_AGENT_API_KEY={your_ark_api_key}
 ```
+
+**环境变量说明:**
+
+- `VOLCENGINE_ACCESS_KEY`: 火山引擎访问凭证的 Access Key
+- `VOLCENGINE_SECRET_KEY`: 火山引擎访问凭证的 Secret Key
+- `DATABASE_TOS_BUCKET`: 用于存储检测结果文件的TOS存储桶
+  - 格式: `DATABASE_TOS_BUCKET={your_tos_bucket}`
+  - 示例: `DATABASE_TOS_BUCKET=agentkit-platform-12345678901234567890`
+- `MODEL_AGENT_API_KEY`: 从火山方舟获取的模型 Agent API Key
+
+> 如何创建 TOS桶 [参考](https://www.volcengine.com/docs/6349/75024?lang=zh)
 
 ## 本地运行
 
@@ -118,14 +127,7 @@ export MODEL_AGENT_API_KEY=<your_ark_api_key>
 # 1. 进入上级目录
 cd 02-use-cases
 
-# 2. 可选: 创建 .env 文件 (如果已设置环境变量可跳过)
-touch .env
-echo "VOLCENGINE_ACCESS_KEY=AK" >> .env
-echo "VOLCENGINE_SECRET_KEY=SK" >> .env
-# 设置 TOS 存储桶用于上传检测过程的结果文件
-echo "DATABASE_TOS_BUCKET=agentkit-platform-{{your_account_id}}" >> .env
-
-# 3. 启动 Web 界面
+# 2. 启动 Web 界面
 veadk web
 ```
 
@@ -152,7 +154,7 @@ cd 02-use-cases/inspection_assistant
 agentkit config \
 --agent_name inspection_assistant \
 --entry_point 'agent.py' \
---runtime_envs DATABASE_TOS_BUCKET=agentkit-platform-{{your_account_id}} \
+--runtime_envs DATABASE_TOS_BUCKET={your_tos_bucket} \
 --launch_type cloud
 
 # 3. 部署到运行时

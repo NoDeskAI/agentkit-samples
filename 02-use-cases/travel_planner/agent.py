@@ -50,7 +50,8 @@ else:
     raise ValueError("DATABASE_VIKING_COLLECTION environment variable is not set")
 # 依赖tos桶加载知识库内容
 tos_bucket_name = os.getenv("DATABASE_TOS_BUCKET", "")
-if tos_bucket_name == "":
+tos_region = os.getenv("DATABASE_TOS_REGION", "")
+if tos_bucket_name == "" or tos_region == "":
     raise ValueError("DATABASE_TOS_BUCKET environment variable is not set")
 # 从预构建目录加载知识库
 try:

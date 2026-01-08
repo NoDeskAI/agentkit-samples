@@ -159,6 +159,7 @@ export DATABASE_VIKINGMEM_COLLECTION=<Your VikingDB Memory Collection Name>
 
 # TOS桶名称（必需，知识库初始化时使用）
 export DATABASE_TOS_BUCKET=<Your Tos Bucket Name>
+export DATABASE_TOS_REGION=<Your Tos Region>
 ```
 
 ### 调试方法
@@ -241,7 +242,8 @@ agentkit config \
 -e GAODE_MCP_API_KEY=<Your Gaode MCP API Key> \
 -e DATABASE_VIKING_COLLECTION=<Your VikingDB Knowledge Collection Name> \
 -e DATABASE_VIKINGMEM_COLLECTION=<Your VikingDB Memory Collection Name> \
--e DATABASE_TOS_BUCKET=<Your Tos Bucket Name>
+-e DATABASE_TOS_BUCKET=<Your Tos Bucket Name> \
+-e DATABASE_TOS_REGION=<Your Tos Region>
 
 # 4. 启动云端服务
 agentkit launch

@@ -32,6 +32,8 @@ sys.path.append(str(Path(__file__).resolve().parent))
 # Parent directory
 sys.path.append(str(Path(__file__).resolve().parent.parent))
 from veadk.auth.veauth.utils import get_credential_from_vefaas_iam
+from consts import DEFAULT_BUCKET, DEFAULT_REGION
+
 
 logger = logging.getLogger(__name__)
 
@@ -40,7 +42,7 @@ def upload_file_to_tos(
     file_path: str,
     bucket_name: Optional[str] = None,
     object_key: Optional[str] = None,
-    region: str = "cn-beijing",
+    region: Optional[str] = None,
     ak: Optional[str] = None,
     sk: Optional[str] = None,
     session_token: Optional[str] = None,
@@ -71,7 +73,25 @@ def upload_file_to_tos(
         >>> print(url)
         https://bucket.tos-cn-beijing.volces.com/video.mp4?X-Tos-Signature=...
     """
-    bucket_name = os.getenv("DATABASE_TOS_BUCKET")
+
+    if bucket_name is None:
+        bucket_name = os.getenv("DATABASE_TOS_BUCKET")
+        if bucket_name is None:
+            bucket_name = DEFAULT_BUCKET
+            logger.info(
+                f"Warn: bucket_name is not provided in env, using default bucket name: {bucket_name}"
+            )
+        else:
+            logger.info(f"Using bucket_name from env: {bucket_name}")
+    if region is None:
+        region = os.getenv("DATABASE_TOS_REGION")
+        if region is None:
+            region = DEFAULT_REGION
+            logger.info(
+                f"Warn: region is not provided in env, using default region: {region}"
+            )
+        else:
+            logger.info(f"Using region from env: {region}")
 
     # Check if file exists
     if not os.path.exists(file_path):
@@ -199,9 +219,13 @@ if __name__ == "__main__":
         # Call upload function
         url = upload_file_to_tos(
             file_path=test_file,
-            bucket_name="veadk-default",  # You can change to your bucket name
+            bucket_name=os.getenv(
+                "DATABASE_TOS_BUCKET", DEFAULT_BUCKET
+            ),  # You can change to your bucket name
             # object_key="test_video.mp4",  # Optional: specify object key
-            region="cn-beijing",  # You can change to your region
+            region=os.getenv(
+                "DATABASE_TOS_REGION", DEFAULT_REGION
+            ),  # You can change to your region
             expires=604800,  # 7-day validity
         )
 

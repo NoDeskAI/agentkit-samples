@@ -129,9 +129,9 @@ uv pip install -r requirements.txt
 ```bash
 export VOLCENGINE_ACCESS_KEY={your_ak}
 export VOLCENGINE_SECRET_KEY={your_sk}
-export DATABASE_TOS_BUCKET=agentkit-platform-{{your_account_id}}
-export AGENTKIT_TOOL_ID={{your_tool_id}}
-export MODEL_AGENT_API_KEY={{your_model_agent_api_key}} # 从火山方舟获取，本地调试必传
+export DATABASE_TOS_BUCKET={your_tos_bucket}
+export AGENTKIT_TOOL_ID={your_tool_id}
+export MODEL_AGENT_API_KEY={your_model_agent_api_key}
 ```
 
 **环境变量说明:**
@@ -139,13 +139,14 @@ export MODEL_AGENT_API_KEY={{your_model_agent_api_key}} # 从火山方舟获取�
 - `VOLCENGINE_ACCESS_KEY`: 火山引擎访问凭证的 Access Key
 - `VOLCENGINE_SECRET_KEY`: 火山引擎访问凭证的 Secret Key
 - `DATABASE_TOS_BUCKET`: 用于存储生成的前端代码的 TOS 存储桶名称
-  - 格式: `DATABASE_TOS_BUCKET=agentkit-platform-{{your_account_id}}`
+  - 格式: `DATABASE_TOS_BUCKET={your_tos_bucket}`
   - 示例: `DATABASE_TOS_BUCKET=agentkit-platform-12345678901234567890`
-  - 其中`{{your_account_id}}`需要替换为您的火山引擎账号 ID
 - `AGENTKIT_TOOL_ID`: 从 AgentKit 控制台获取的工具 ID
 - `MODEL_AGENT_API_KEY`: 从火山方舟获取的模型 Agent API Key
 
-## 测试
+> 如何创建 TOS桶 [参考](https://www.volcengine.com/docs/6349/75024?lang=zh)
+
+## 本地运行
 
 使用 `veadk web` 进行本地调试:
 
@@ -155,15 +156,7 @@ export MODEL_AGENT_API_KEY={{your_model_agent_api_key}} # 从火山方舟获取�
 # 1. 进入上级目录
 cd 02-use-cases
 
-# 2. 可选: 创建 .env 文件 (如果已设置环境变量可跳过)
-touch .env
-echo "VOLCENGINE_ACCESS_KEY=AK" >> .env
-echo "VOLCENGINE_SECRET_KEY=SK" >> .env
-echo "DATABASE_TOS_BUCKET=agentkit-platform-{{your_account_id}}" >> .env
-echo "AGENTKIT_TOOL_ID={{your_tool_id}}" >> .env
-echo "MODEL_AGENT_API_KEY={{your_model_agent_api_key}}" >> .env
-
-# 3. 启动 Web 界面
+# 2. 启动 Web 界面
 veadk web
 ```
 
@@ -187,8 +180,8 @@ cd 02-use-cases/ai_coding
 agentkit config \
 --agent_name ai_coding \
 --entry_point 'agent.py' \
---runtime_envs DATABASE_TOS_BUCKET=agentkit-platform-{{your_account_id}} \
---runtime_envs AGENTKIT_TOOL_ID={{your_tool_id}} \
+--runtime_envs DATABASE_TOS_BUCKET={your_tos_bucket} \
+--runtime_envs AGENTKIT_TOOL_ID={your_tool_id} \
 --launch_type cloud
 
 # 3. 部署到运行时
