@@ -68,6 +68,8 @@ sequenceDiagram
 
    访问 [飞书开放平台](https://open.feishu.cn/) → 点击「创建应用」
 
+![飞书开放平台](image.png)
+
 2. **创建企业自建应用**
    - 应用类型：企业自建应用
    - 应用名称：`Agent Identity Demo`（自定义）
@@ -78,6 +80,8 @@ sequenceDiagram
    进入应用详情 → 「凭证与基础信息」，记录：
    - **App ID**（客户端 ID）
    - **App Secret**（客户端密钥）
+
+![获取应用凭证](image-1.png)
 
 4. **⚠️ 配置安全设置（最关键的一步！）**
 
@@ -99,6 +103,8 @@ sequenceDiagram
    > - 不要使用 `127.0.0.1:8000` 作为重定向 URL（这是 Agent 应用地址，不是 OAuth 回调地址）
    > - 不要漏掉 `/login/generic_oauth/callback` 路径
    > - URL 必须与控制台显示的完全一致，包括协议 `https://`
+
+![配置安全设置](image-2.png)
 
 5. **网页应用配置（可选，非必须）**
 
@@ -128,6 +134,8 @@ sequenceDiagram
    > - 火山引擎用户池默认会请求 `contact:contact.base:readonly` 权限
    > - **如果不申请这个权限，登录时会报错 `20027 当前应用未申请相关权限`**
    > - 两个必须权限缺一不可！
+
+![添加权限](image-3.png)
 
 7. **发布应用**
 
@@ -161,6 +169,9 @@ sequenceDiagram
 4. **保存配置**
 
    > 保存后，页面会显示「重定向 URI」，确认这个 URL 已经添加到飞书应用的「安全设置」中。
+
+![配置飞书 IdP](image-4.png)
+![保存配置](image-5.png)
 
 配置完成后，用户池登录页面将显示「使用飞书登录」按钮。
 
@@ -208,6 +219,9 @@ uv run veadk web
 4. 返回应用后，点击 **「允许访问」**
 5. 成功登录，开始与 Agent 对话
 
+![飞书登录按钮](image-6.png)
+![飞书授权页面](image-7.png)
+
 ## 测试提示词
 
 ```
@@ -217,6 +231,10 @@ uv run veadk web
 ## 预期结果
 
 成功登录后，Agent 将返回欢迎信息。用户的飞书身份信息（如用户名、组织）可用于后续的权限控制和审计。
+
+![允许访问](image-8.png)
+![登录成功](image-9.png)
+![Agent 对话](image-10.png)
 
 ---
 
