@@ -6,7 +6,7 @@
 >
 > 该示例以单个 Root Agent 对外提供服务，内部由多个子 Agent 按固定顺序执行，便于本地调试与云端部署。
 
-- 本项目是`04_ad_video_gen_a2a`的衍生，对其进行了agentkit平台部署的适配。
+- 本项目是`ad_video_gen_a2a`的衍生，对其进行了agentkit平台部署的适配。
 - 本项目是sequential-agent，而multimedia是使用的是a2a 方式进行agent交互
 - 本项目能够在agentkit 平台进行部署
 
@@ -63,7 +63,7 @@
 ```bash
 # 克隆代码仓库
 git clone https://github.com/volcengine/agentkit-samples.git
-cd agentkit-samples/python/02-use-cases/12_ad_video_gen_seq
+cd agentkit-samples/python/02-use-cases/ad_video_gen_seq
 
 # 安装项目依赖
 uv sync --index-url https://mirrors.aliyun.com/pypi/simple

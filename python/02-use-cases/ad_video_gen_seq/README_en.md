@@ -63,7 +63,7 @@ Follow these steps to set up and run the project locally.
 ```bash
 # Clone the repository
 git clone https://github.com/volcengine/agentkit-samples.git
-cd agentkit-samples/python/02-use-cases/12_ad_video_gen_seq
+cd agentkit-samples/python/02-use-cases/ad_video_gen_seq
 
 # Install dependencies
 uv sync --index-url https://mirrors.aliyun.com/pypi/simple
