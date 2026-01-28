@@ -11,6 +11,7 @@ description: 根据用户的功能需求，完成与 VeADK 相关的功能。
 
 1. 用户简要描述了其功能需求，并希望构建一个 Agent 来完成；
 2. 用户希望可以将已有的 Langchain/Langgraph 代码转化为 VeADK Agent 代码
+3. 用户希望可以将已有的 Dify 工作流转化为 VeADK Agent 代码
 
 ## 具体步骤
 

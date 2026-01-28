@@ -21,8 +21,9 @@ knowledgebase = KnowledgeBase(
     description="A knowledge base about ...",
     backend="viking",
     index=app_name,
-    top_k=10,
 )
 
 agent = Agent(knowledgebase=knowledgebase)
 ```
+
+其中，`backend` 为知识库后端，当前支持 `viking` 后端。`name` 为知识库名称，`description` 为知识库描述，你需要根据业务场景和知识库内容，来定义一个有意义的名称和描述。
