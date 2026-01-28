@@ -21,10 +21,8 @@ import mimetypes
 from volcenginesdkarkruntime import Ark
 
 # Try to import constants, with fallback
-try:
-    from veadk.consts import DEFAULT_VIDEO_MODEL_NAME
-except ImportError:
-    DEFAULT_VIDEO_MODEL_NAME = "doubao-seedance-1-0-pro"
+
+DEFAULT_VIDEO_MODEL_NAME = "doubao-seedance-1-5-pro-251215"
 
 
 def get_image_content(image_input: str) -> str:
