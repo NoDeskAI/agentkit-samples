@@ -80,3 +80,19 @@ agent = Agent(
     model_extra_config={"response_format": MathResponse},
 )
 ```
+
+## 运行 Agent
+
+如果你想直接在 Python 中执行 Agent，可以通过定义 Runner 来执行：
+
+```python
+import asyncio
+
+from veadk import Agent, Runner
+
+agent = Agent()
+runner = Runner(agent=agent) # 挂载想要运行的 Agent
+
+response = asyncio.run(runner.run("你好")) # 使用 `run` 函数执行
+print(response)
+```
