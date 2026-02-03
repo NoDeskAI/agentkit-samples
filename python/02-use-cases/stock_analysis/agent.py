@@ -15,7 +15,6 @@ import datetime
 import os
 from tzlocal import get_localzone
 
-import os
 from veadk import Agent
 from veadk.memory.short_term_memory import ShortTermMemory
 from veadk.tools.builtin_tools.run_code import run_code
@@ -50,7 +49,6 @@ agent = Agent(
     * If dependency libraries are missing, install them for the sandbox using Python code.
     """,
     tools=[get_current_time, run_code, web_search],
-    model_name=model_name,
 )
 
 root_agent = agent
