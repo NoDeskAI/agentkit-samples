@@ -35,7 +35,7 @@ def get_current_time() -> str:
 agent = Agent(
     name="data_analysis_agent",
     description="A data analysis for stock marketing",
-    model_name=os.getenv("MODEL_AGENT_NAME", "deepseek-v3-2-251201"),
+    # model_name=os.getenv("MODEL_AGENT_NAME", "deepseek-v3-2-251201"),
     instruction="""
     You are a data analysis agent for stock marketing.
     Talk with user friendly. You can invoke your tools to finish user's task or question.
@@ -49,6 +49,7 @@ agent = Agent(
     * If dependency libraries are missing, install them for the sandbox using Python code.
     """,
     tools=[get_current_time, run_code, web_search],
+    model_name=model_name,
 )
 
 root_agent = agent
