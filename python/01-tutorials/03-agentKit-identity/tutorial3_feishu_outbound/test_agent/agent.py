@@ -38,6 +38,19 @@ from veadk.integrations.ve_identity.auth_mixins import OAuth2AuthMixin
 from google.adk.tools.function_tool import FunctionTool
 from google.adk.tools.tool_context import ToolContext
 
+from veadk import Runner
+from agentkit.apps import AgentkitSimpleApp
+from typing import AsyncGenerator
+
+from veadk.integrations.ve_identity import (
+    is_pending_auth_event,
+    get_function_call_id,
+    get_function_call_auth_config,
+)
+from google.adk.events.event import Event
+from google.adk.utils.context_utils import Aclosing
+from google.genai import types
+
 load_dotenv(Path(__file__).parent / ".env")
 
 
@@ -180,21 +193,6 @@ agent: Agent = Agent(
 - 说"重新授权飞书"可以重新触发飞书授权
 """,
 )
-
-from veadk import Runner
-from agentkit.apps import AgentkitSimpleApp
-from typing import AsyncGenerator
-
-from veadk.integrations.ve_identity import (
-    AuthRequestProcessor,
-    is_pending_auth_event,
-    get_function_call_id,
-    get_function_call_auth_config,
-    oauth2_auth,
-)
-from google.adk.events.event import Event
-from google.adk.utils.context_utils import Aclosing
-from google.genai import types
 
 app = AgentkitSimpleApp()
 app_name = "simple_streamable_app"
