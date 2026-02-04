@@ -26,6 +26,7 @@ description: 根据用户的功能需求，完成与 VeADK-Go 相关的功能; �
 ### Enio 代码转换为 VeADK-Go Agent
 
 请你遵循以下步骤：
+
 1. 了解VeADK-Go开发框架的代码结构、功能特性以及代码示例，可以参考 `/references/common/` 目录下文档
 2. 分析原有 Enio 代码
 3. 将原有代码改为 VeADK-Go Agent。代码特性对应关系参考 `references/converter/enio_rules.md`
@@ -38,4 +39,3 @@ description: 根据用户的功能需求，完成与 VeADK-Go 相关的功能; �
 - `agent_name/agent.py`：包含所有智能体的代码
 
 其中，`agent_name` 是你认为合适的 Agent 的名称。
-
