@@ -308,7 +308,13 @@ uv run python .scripts/smoke_test.py --pipeline-cases
 **Install AgentKit CLI:**
 
 ```bash
-pip install agentkit
+pip install agentkit-sdk-python==0.5.1
+```
+
+Or using `uv`:
+
+```bash
+uv pip install agentkit-sdk-python==0.5.1
 ```
 
 ### One-Click Deployment
