@@ -7,7 +7,7 @@ dependencies = [
     # AgentKit 核心三件套
     "veadk-python==0.5.1",
     "google-adk==1.19.0",  # veadk-python 0.5.1 锁定此版本
-    "agentkit-sdk-python==0.2.2",
+    "agentkit-sdk-python==0.5.1",
     # HTTP 客户端
     "httpx>=0.26.0",
     # TOS 对象存储（视频上传）
