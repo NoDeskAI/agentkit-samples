@@ -49,4 +49,3 @@ def clean_analyze_hook_arguments(
             "[clean_tool_args] polluted args detected in hook_analysis_agent, forced to {}"
         )
     return llm_response
-

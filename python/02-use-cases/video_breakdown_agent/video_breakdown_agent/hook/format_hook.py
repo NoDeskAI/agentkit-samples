@@ -12,7 +12,6 @@ import json
 import re
 from typing import Any, Optional
 
-import json_repair
 from google.adk.agents.callback_context import CallbackContext
 from google.adk.events import Event
 from google.adk.models import LlmResponse

@@ -145,14 +145,18 @@ def create_hook_analyzer_agent() -> SequentialAgent:
                 "thinking": {
                     "type": os.getenv("THINKING_HOOK_ANALYZER_AGENT", "disabled")
                 },
-                "caching": {"type": "disabled"},  # 禁用缓存，避免账户未激活 cache service
+                "caching": {
+                    "type": "disabled"
+                },  # 禁用缓存，避免账户未激活 cache service
             }
         },
     )
 
     hook_format_agent = Agent(
         name="hook_format_agent",
-        model_name=os.getenv("MODEL_FORMAT_NAME", os.getenv("MODEL_AGENT_NAME", "doubao-seed-1-6-251015")),
+        model_name=os.getenv(
+            "MODEL_FORMAT_NAME", os.getenv("MODEL_AGENT_NAME", "doubao-seed-1-6-251015")
+        ),
         description="将钩子分析结果格式化为结构化输出并投影为用户可读 Markdown",
         instruction=HOOK_FORMAT_INSTRUCTION,
         generate_content_config=json_response_config,

@@ -54,7 +54,9 @@ hook_analysis_agent = Agent(
 # 第二阶段：对齐 multimedia 的格式化收口模式
 hook_format_agent = Agent(
     name="hook_format_agent",
-    model_name=os.getenv("MODEL_FORMAT_NAME", os.getenv("MODEL_AGENT_NAME", "doubao-seed-1-6-251015")),
+    model_name=os.getenv(
+        "MODEL_FORMAT_NAME", os.getenv("MODEL_AGENT_NAME", "doubao-seed-1-6-251015")
+    ),
     description="将钩子分析结果格式化为结构化输出并投影为用户可读 Markdown",
     instruction=HOOK_FORMAT_INSTRUCTION,
     generate_content_config=json_response_config,
