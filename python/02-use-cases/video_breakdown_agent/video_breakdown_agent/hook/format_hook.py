@@ -20,7 +20,7 @@ from veadk.utils.logger import get_logger
 
 logger = get_logger(__name__)
 
-_TARGET_AGENTS = {"hook_format_agent", "hook_analyzer_agent"}
+_TARGET_AGENTS = {"hook_agent"}
 _MAX_COMMENT_LEN = 800
 
 _SCORE_FIELDS = (
@@ -31,6 +31,24 @@ _SCORE_FIELDS = (
     "information_density",
     "rhythm_control",
 )
+
+# 中文字段名到英文字段名的映射，用于从 LLM Markdown 输出中提取各维度分数
+_ZH_SCORE_MAPPINGS = {
+    "visual_impact": r"视觉冲击力",
+    "language_hook": r"语言钩子",
+    "emotion_trigger": r"情绪唤起",
+    "information_density": r"信息密度",
+    "rhythm_control": r"节奏掌控",
+}
+
+# 中文维度标题到 comment 字段名的映射，用于精确提取各维度评价文本
+_ZH_COMMENT_MAPPINGS = {
+    "visual_comment": r"视觉冲击力",
+    "language_comment": r"语言钩子",
+    "emotion_comment": r"情绪唤起",
+    "info_comment": r"信息密度",
+    "rhythm_comment": r"节奏掌控",
+}
 
 _DEFAULT_HOOK_ANALYSIS: dict[str, Any] = {
     "overall_score": 0.0,
@@ -94,6 +112,25 @@ def _looks_like_tool_envelope(payload: Any) -> bool:
     return False
 
 
+def _has_hook_fields(parsed: dict) -> bool:
+    """判断解析结果是否含有有意义的钩子分析字段。
+    防止 json_repair 将 Markdown 文本错误解析为空 {}，进而导致全 0.0 默认值。
+    """
+    hook_fields = {
+        "overall_score",
+        "visual_impact",
+        "language_hook",
+        "emotion_trigger",
+        "information_density",
+        "rhythm_control",
+        "visual_comment",
+        "language_comment",
+        "emotion_comment",
+        "hook_type",
+    }
+    return bool(hook_fields & set(parsed.keys()))
+
+
 def _is_tool_call_turn(model_response_event: Optional[Event], text: str) -> bool:
     event_text = _event_to_text(model_response_event).lower()
     if any(
@@ -119,10 +156,30 @@ def _is_tool_call_turn(model_response_event: Optional[Event], text: str) -> bool
 
 
 def _extract_json_candidate(text: str) -> str:
+    """提取 JSON 候选文本，优先从代码块中提取，否则尝试提取第一个 JSON 对象"""
+    # 优先从代码块中提取
     fenced = re.search(r"```(?:json)?\s*([\s\S]*?)\s*```", text, flags=re.IGNORECASE)
     if fenced and fenced.group(1).strip():
         return fenced.group(1).strip()
-    return text.strip()
+
+    # 如果没有代码块，尝试提取第一个完整的 JSON 对象（从 { 到匹配的 }）
+    stripped = text.strip()
+    if stripped.startswith("{"):
+        # 尝试找到匹配的闭合括号
+        brace_count = 0
+        end_pos = -1
+        for i, char in enumerate(stripped):
+            if char == "{":
+                brace_count += 1
+            elif char == "}":
+                brace_count -= 1
+                if brace_count == 0:
+                    end_pos = i + 1
+                    break
+        if end_pos > 0:
+            return stripped[:end_pos]
+
+    return stripped
 
 
 def _coerce_to_list(value: Any) -> list[str]:
@@ -210,6 +267,13 @@ def _fallback_struct_from_text(text: str) -> dict[str, Any]:
         if score is not None:
             output[field] = score
 
+    # 中文字段提取（优先级高于英文，覆盖上方英文提取结果）
+    # 匹配 "视觉冲击力: 7.2/10" 或 "视觉冲击力：7.2" 等格式
+    for field, zh_label in _ZH_SCORE_MAPPINGS.items():
+        m = re.search(rf"{zh_label}\s*[:：]\s*([0-9]+(?:\.[0-9]+)?)", text)
+        if m:
+            output[field] = _clamp_score(m.group(1))
+
     zh_score = re.search(r"综合评分\s*[:：]\s*([0-9]+(?:\.[0-9]+)?)", text)
     if zh_score:
         output["overall_score"] = _clamp_score(zh_score.group(1))
@@ -220,16 +284,30 @@ def _fallback_struct_from_text(text: str) -> dict[str, Any]:
         text, r"(?:优化建议|建议|suggestions)"
     )
 
-    excerpt = _safe_text(text, max_len=500)
-    if excerpt:
-        for field in (
-            "visual_comment",
-            "language_comment",
-            "emotion_comment",
-            "info_comment",
-            "rhythm_comment",
-        ):
-            output[field] = excerpt
+    # 精确提取各维度 comment（从对应标题后的段落/引用块提取，不再用整段文本回填）
+    for field, zh_label in _ZH_COMMENT_MAPPINGS.items():
+        m = re.search(
+            rf"#{{1,4}}\s*{zh_label}.*?(?:\n)([\s\S]{{0,500}}?)(?=#{{1,4}}|\Z)",
+            text,
+            flags=re.IGNORECASE,
+        )
+        if m:
+            # 去除 Markdown 引用符号 > 和多余空白
+            comment = re.sub(r"^[>\s]+", "", m.group(1), flags=re.MULTILINE).strip()
+            if comment:
+                output[field] = _safe_text(comment, max_len=500)
+
+    # 元信息字段提取（hook_type / target_audience / retention_prediction）
+    for field, pattern in [
+        ("hook_type", r"钩子类型\s*[:\uff1a*]+\s*(.+?)(?:[|｜]|\n|$)"),
+        ("target_audience", r"目标受众\s*[:\uff1a*]+\s*(.+?)(?:[|｜]|\n|$)"),
+        ("retention_prediction", r"留存预测\s*[:\uff1a*]+\s*(.+?)(?:\n\n|\Z)"),
+    ]:
+        m = re.search(pattern, text)
+        if m:
+            value = m.group(1).strip()
+            if value:
+                output[field] = _safe_text(value, max_len=200)
 
     return _normalize_output(output)
 
@@ -289,6 +367,18 @@ def soft_fix_hook_output(
     if agent_name not in _TARGET_AGENTS:
         return llm_response
 
+    if not llm_response or not llm_response.content or not llm_response.content.parts:
+        return llm_response
+
+    # 放行 function_call / function_response，避免干扰 SDK 事件追踪。
+    # 必须检查所有 parts：当 parts[0]=文本、parts[1]=function_call 时，
+    # 若只检查 parts[0] 会错误地改写文本，同时放行 function_call，导致死循环。
+    for part in llm_response.content.parts:
+        if hasattr(part, "function_call") and part.function_call:
+            return llm_response
+        if hasattr(part, "function_response") and part.function_response:
+            return llm_response
+
     text = _get_first_text(llm_response)
     if not text:
         return llm_response
@@ -300,18 +390,40 @@ def soft_fix_hook_output(
     candidate = _extract_json_candidate(text)
 
     parsed: Any = None
+    json_error: Optional[str] = None
     try:
         parsed = json.loads(candidate)
-    except json.JSONDecodeError:
+    except json.JSONDecodeError as e:
+        json_error = str(e)
+        logger.debug(
+            "[soft_fix_hook_output] json.loads failed, trying json_repair: %s (text_len=%d)",
+            json_error,
+            len(candidate),
+        )
         try:
             parsed = json_repair.loads(candidate)
-        except Exception:
+            logger.info(
+                "[soft_fix_hook_output] json_repair succeeded for agent=%s", agent_name
+            )
+        except Exception as repair_error:
+            logger.warning(
+                "[soft_fix_hook_output] json_repair also failed for agent=%s: %s (original: %s)",
+                agent_name,
+                str(repair_error),
+                json_error,
+            )
             parsed = None
 
     if isinstance(parsed, list):
         parsed = parsed[0] if parsed else {}
 
-    if isinstance(parsed, dict) and not _looks_like_tool_envelope(parsed):
+    # 仅当解析结果是含钩子字段的有效 dict 时才使用 JSON 路径；
+    # json_repair 对纯 Markdown 文本会返回 {}，若不加校验会导致全 0.0 默认值。
+    if (
+        isinstance(parsed, dict)
+        and not _looks_like_tool_envelope(parsed)
+        and _has_hook_fields(parsed)
+    ):
         normalized = _normalize_output(parsed)
         logger.info(
             "[soft_fix_hook_output] normalized by json path agent=%s", agent_name
@@ -319,7 +431,10 @@ def soft_fix_hook_output(
     else:
         normalized = _fallback_struct_from_text(text)
         logger.warning(
-            "[soft_fix_hook_output] fallback to text extraction agent=%s", agent_name
+            "[soft_fix_hook_output] fallback to text extraction agent=%s "
+            "(parsed_keys=%s)",
+            agent_name,
+            list(parsed.keys()) if isinstance(parsed, dict) else type(parsed).__name__,
         )
 
     markdown_summary = _build_hook_markdown_summary(normalized)

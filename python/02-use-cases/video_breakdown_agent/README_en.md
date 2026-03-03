@@ -1,21 +1,29 @@
-# Video Breakdown Analyzer
+# Video Breakdown & Recreation Agent
 
 ## Overview
 
-This is an intelligent short-video analysis system built on Volcengine VeADK & AgentKit. The system adopts a Multi-Agent architecture, integrating FFmpeg video processing, Volcengine ASR speech recognition, LiteLLM multimodal vision analysis, and TOS object storage, capable of comprehensive professional analysis of short videos.
+This is an intelligent short-video analysis and recreation system built on Volcengine VeADK & AgentKit. The system adopts a Multi-Agent architecture, integrating FFmpeg video processing, Volcengine ASR speech recognition, LiteLLM multimodal vision analysis, TOS object storage, and Doubao-Seedance video generation, capable of comprehensive professional analysis of short videos and one-click recreation of viral videos.
 
 ## Core Features
 
 This project provides the following core capabilities:
 
-- **Video Scene Segmentation**: Automatically identifies video scenes based on FFmpeg, extracts key frames and analyzes visual content, outputting structured scene data
+- **Video Scene Segmentation**: Automatically identifies video scenes based on FFmpeg, extracts key frames and analyzes visual content (including 5 dimensions: lighting, color tone, depth of field, composition, and motion), outputting structured scene data
 - **First 3-Second Hook Analysis**: Professional scoring from 5 dimensions: visual impact, language hooks, emotional arousal, information density, and rhythm control
 - **Professional Report Generation**: Integrates scene data and hook analysis results to generate complete analysis reports in Markdown format
 - **Web Search**: Real-time access to the latest short-video industry information, platform rules, and trending topics
+- **Video Prompt Generation**: LLM-led 3-stage workflow (Feature Extraction → Knowledge Retrieval → Prompt Assembly) converting scene scripts into professional video generation prompts
+- **Video Recreation**: Calls Doubao-Seedance model supporting first-frame (I2V), text-to-video (T2V), reference images, and audio generation to recreate viral videos scene by scene
 
 ## Agent Architecture
 
-![Video Breakdown Agent with AgentKit Runtime](assets/architecture_video_breakdown_agent.jpg)
+### Agent Workflow
+
+![Agent Workflow](img/scene_architecture.png)
+
+### Technical Architecture
+
+![Video Breakdown Agent with AgentKit Runtime](img/architecture_video_breakdown_agent.png)
 
 ```text
 User Input (Video URL/Local File)
@@ -26,14 +34,18 @@ Root Agent (XiaoShi - Main Orchestrator)
     ├── Breakdown Agent (Scene Segmentation)
     │   ├── FFmpeg Video Preprocessing
     │   ├── Volcengine ASR Speech Recognition
-    │   ├── LiteLLM Vision Analysis
+    │   ├── LiteLLM Vision Analysis (lighting/color/depth/composition/motion)
     │   └── BGM Analysis
     ├── Hook Analyzer Agent (Hook Analysis)
     │   ├── First 3-Second Scene Extraction
     │   ├── Multimodal Vision Scoring
     │   └── JSON Formatting
     ├── Report Generator Agent (Report Generation)
-    └── Search Agent (Web Search)
+    ├── Video Recreation Agent (Video Recreation)
+    │   ├── Prompt Generator (3-stage LLM workflow)
+    │   ├── Video Generator (Doubao-Seedance API)
+    │   └── Video Merge (Scene stitching)
+    └── Web Search (Direct Tool)
 ```
 
 Main Volcengine products and Agent components:
@@ -41,6 +53,8 @@ Main Volcengine products and Agent components:
 - Ark LLM Platform:
   - doubao-seed-1-6-251015 (primary reasoning model)
   - doubao-seed-1-6-vision-250815 (vision analysis model)
+  - doubao-seedance-1-5-pro-251215 (video generation, image-to-video)
+  - doubao-seedance-1-0-pro-250528 (video generation, text-to-video)
 - TOS Object Storage
 - Volcengine ASR Speech Recognition (optional)
 - Web Search
@@ -112,7 +126,7 @@ Below is a typical workflow from web search to in-depth video breakdown.
 
 **User:** Analyze the first 3 seconds hook in detail.
 
-**XiaoShi (Root Agent):** 
+**XiaoShi (Root Agent):**
 
 #### 🪝 First 3s Hook Analysis & Rating
 
@@ -130,11 +144,37 @@ Below is a typical workflow from web search to in-depth video breakdown.
 
 ---
 
-### 4. Generate Insight Report
+### 4. Video Recreation
+
+**User:** Generate a video prompt for scene 1 and recreate this scene.
+
+**XiaoShi (Root Agent):**
+
+#### 🎬 Scene 1 - Video Generation Prompt
+
+Based on the scene breakdown, the LLM 3-stage workflow generates:
+
+**Positive Prompt:**
+> Close-up static shot, a hand with glitter nail art holding a white thermos cup displaying the exterior, then operating the lid ring with both hands. Soft indoor natural lighting, cartoon calendar background, warm white color tone, center composition, crisp product texture, soothing ambient music.
+
+**Generation Info:**
+- Time range: 0.0-3.0s | Duration: 3s (auto-snapped to 5s)
+- Model: doubao-seedance-1-5-pro-251215 (image-to-video)
+- Estimated cost: ¥0.70
+
+**XiaoShi (Root Agent):** ✅ Video generation complete!
+
+📽️ Scene 1 video: `https://ark-content-generation-cn-beijing.volces.com/...`
+
+Need to merge multiple scenes or adjust the prompt? Just let me know.
+
+---
+
+### 5. Generate Insight Report
 
 **User:** Give me a detailed video insight report.
 
-**XiaoShi (Root Agent):** 
+**XiaoShi (Root Agent):**
 
 #### 📊 LocknLock Product Display Insight Report
 
@@ -156,7 +196,6 @@ The video follows a "General -> Detail -> Scenario -> Extension" logic, forming 
 video_breakdown_agent/
 ├── README.md                   # Project documentation (Chinese)
 ├── README_en.md                # Project documentation (English)
-├── README_CONFIG.md            # Detailed configuration guide
 ├── project.toml                # Application marketplace metadata
 ├── agent.py                    # AgentKit deployment entry
 ├── requirements.txt            # pip dependencies
@@ -259,6 +298,10 @@ MODEL_VISION_NAME=doubao-seed-1-6-vision-250815
 # Or use Gemini:
 # MODEL_VISION_NAME=gemini/gemini-2.5-pro
 # GEMINI_API_KEY=your_gemini_api_key
+
+# Video recreation (optional, required only when using video generation)
+MODEL_VIDEO_API_KEY=your_ark_api_key  # can be the same as MODEL_AGENT_API_KEY
+MODEL_VIDEO_NAME=doubao-seedance-1-5-pro-251215  # default, can be omitted
 ```
 
 **Method 2: Use environment variables directly**
@@ -271,8 +314,6 @@ export DATABASE_TOS_BUCKET=your_tos_bucket_name
 ```
 
 **Priority**: System environment variables > `.env` file > `config.yaml`
-
-For detailed configuration instructions, see [README_CONFIG.md](README_CONFIG.md).
 
 ### Running the Application
 
@@ -308,13 +349,7 @@ uv run python .scripts/smoke_test.py --pipeline-cases
 **Install AgentKit CLI:**
 
 ```bash
-pip install agentkit-sdk-python==0.5.1
-```
-
-Or using `uv`:
-
-```bash
-uv pip install agentkit-sdk-python==0.5.1
+pip install agentkit
 ```
 
 ### One-Click Deployment
@@ -343,11 +378,13 @@ agentkit logs
 
 After deployment, you need to configure the following environment variables in the [AgentKit Console](https://console.volcengine.com/agentkit):
 
-- `MODEL_AGENT_API_KEY`: Ark API Key
+- `MODEL_AGENT_API_KEY`: Ark API Key (text/vision models)
+- `MODEL_VIDEO_API_KEY`: Ark API Key for video generation (can be the same as above)
 - `VOLCENGINE_ACCESS_KEY`: Volcengine Access Key
 - `VOLCENGINE_SECRET_KEY`: Volcengine Secret Key
 - `DATABASE_TOS_BUCKET`: TOS bucket name
 - `DATABASE_TOS_REGION`: TOS region (default: `cn-beijing`)
+- `MODEL_VIDEO_NAME`: Video generation model (optional, default: `doubao-seedance-1-5-pro-251215`)
 
 **4. Test deployment:**
 
@@ -379,19 +416,27 @@ docker run -p 8000:8000 \
 ./deploy.sh
 ```
 
-For detailed deployment instructions, see [DEPLOY_GUIDE.md](DEPLOY_GUIDE.md).
-
 ## Key Features
 
 ### 1. Multi-Agent Architecture
 
 - **Root Agent**: Main orchestrator, responsible for understanding user intent and dispatching sub-agents
-- **Breakdown Agent**: Video preprocessing + vision analysis + BGM analysis
+- **Breakdown Agent**: Video preprocessing + vision analysis (5 dimensions) + BGM analysis
 - **Hook Analyzer Agent**: SequentialAgent (vision scoring → JSON formatting)
 - **Report Generator Agent**: Markdown report generation
-- **Search Agent**: Real-time web search
+- **Web Search (direct tool)**: Real-time web search
+- **Video Recreation Agent**: Prompt generation + Doubao-Seedance video generation + scene merging
 
-### 2. Powerful Vision Analysis
+### 2. Video Recreation & Generation (New in v3.0)
+
+- **LLM-led Prompt Generation**: 3-stage Skill workflow (Feature Extraction → Knowledge Retrieval → Prompt Assembly), strictly based on original scene scripts
+- **Doubao-Seedance Integration**: Supports first-frame I2V, pure T2V, reference images, and audio generation; automatically selects the optimal model
+- **Duration Auto-snap**: Scene durations automatically snapped to 5/10s (API requirement)
+- **Enhanced Vision Analysis**: 5 new dimensions (lighting, color tone, depth of field, composition, motion) provide richer context for prompt generation
+- **Scene-by-scene Generation**: Each scene is generated independently with selective generation and cost estimation; multi-scene merging is supported
+- **Style Transfer**: Retain original script structure while swapping theme/product
+
+### 3. Powerful Vision Analysis
 
 - LiteLLM unified routing supporting multiple vision models:
   - Volcengine Doubao Vision
@@ -433,6 +478,16 @@ Generate a complete video analysis report
 **Search information:**
 ```
 What are the latest Douyin recommendation algorithm rules?
+```
+
+**Video recreation:**
+```
+Generate a video prompt for scene 1 and recreate this scene
+```
+
+**Selective scene generation:**
+```
+Generate scenes 1 and 3 only
 ```
 
 ## Demo
